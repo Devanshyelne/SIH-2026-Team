@@ -1,7 +1,7 @@
 .env
 .venv/
+.dist/
 __pycache__/
 *.pyc
-CHAT_BOT/chroma_db/
-.streamlit/secrets.toml
+chroma_db/
 .DS_Store
