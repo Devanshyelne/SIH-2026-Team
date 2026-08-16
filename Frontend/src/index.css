@@ -1,0 +1,120 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+/* Type scale — scales up in Accessibility Mode */
+.txt-xs {
+  font-size: 11px;
+  line-height: 15px;
+}
+.txt-sm {
+  font-size: 13px;
+  line-height: 18px;
+}
+.txt-base {
+  font-size: 15px;
+  line-height: 22px;
+}
+.txt-lg {
+  font-size: 17px;
+  line-height: 24px;
+}
+.txt-xl {
+  font-size: 21px;
+  line-height: 27px;
+}
+.txt-2xl {
+  font-size: 26px;
+  line-height: 32px;
+}
+.setu-a11y .txt-xs {
+  font-size: 13px;
+  line-height: 18px;
+}
+.setu-a11y .txt-sm {
+  font-size: 15px;
+  line-height: 21px;
+}
+.setu-a11y .txt-base {
+  font-size: 17px;
+  line-height: 25px;
+}
+.setu-a11y .txt-lg {
+  font-size: 20px;
+  line-height: 28px;
+}
+.setu-a11y .txt-xl {
+  font-size: 24px;
+  line-height: 30px;
+}
+.setu-a11y .txt-2xl {
+  font-size: 29px;
+  line-height: 35px;
+}
+.tap {
+  min-height: 44px;
+}
+.setu-a11y .tap {
+  min-height: 56px;
+}
+/* Accessibility Mode raises border contrast */
+.setu-a11y .hairline {
+  border-color: #102a43;
+}
+.hairline {
+  border-color: #e2e8f0;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+@keyframes setu-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+.route-dash {
+  animation: setu-dash 1s linear infinite;
+}
+@keyframes setu-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+.here-pulse {
+  transform-origin: center;
+  animation: setu-pulse 2s ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-dash,
+  .here-pulse {
+    animation: none;
+  }
+}
