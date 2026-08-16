@@ -1,0 +1,15 @@
+hour,time_window,dadar_west_entry_exit_est,dadar_central_entry_exit_est,dadar_combined_entry_exit_est,anchor_type,year_of_source
+8,08:00-09:00,24392,22081,46473,derived_from_MRVC_historical_hourly_profile,2011
+9,09:00-10:00,26113,26148,52261,derived_from_MRVC_historical_hourly_profile,2011
+10,10:00-11:00,23244,24115,47359,derived_from_MRVC_historical_hourly_profile,2011
+11,11:00-12:00,19226,19757,38983,derived_from_MRVC_historical_hourly_profile,2011
+12,12:00-13:00,17218,17142,34360,derived_from_MRVC_historical_hourly_profile,2011
+13,13:00-14:00,16357,15980,32337,derived_from_MRVC_historical_hourly_profile,2011
+14,14:00-15:00,15496,15980,31476,derived_from_MRVC_historical_hourly_profile,2011
+15,15:00-16:00,16644,16561,33205,derived_from_MRVC_historical_hourly_profile,2011
+16,16:00-17:00,18365,18304,36669,derived_from_MRVC_historical_hourly_profile,2011
+17,17:00-18:00,21809,22952,44761,derived_from_MRVC_historical_hourly_profile,2011
+18,18:00-19:00,26687,28182,54869,derived_from_MRVC_historical_hourly_profile,2011
+19,19:00-20:00,26113,27310,53423,derived_from_MRVC_historical_hourly_profile,2011
+20,20:00-21:00,20661,20628,41289,derived_from_MRVC_historical_hourly_profile,2011
+21,21:00-22:00,14635,14527,29162,derived_from_MRVC_historical_hourly_profile,2011
