@@ -1,12 +1,12 @@
 from dotenv import load_dotenv
 
-from rag_core.pdf import DEFAULT_MODEL, answer_question, get_llm, load_vectorstore, make_retriever
+from rag_core.pdf import DEFAULT_MODEL, answer_question, ensure_vectorstore, get_llm, make_retriever
 
 load_dotenv()
 
 
 def main() -> None:
-    vectorstore = load_vectorstore()
+    vectorstore = ensure_vectorstore()
     retriever = make_retriever(vectorstore)
     llm = get_llm(DEFAULT_MODEL)
 
