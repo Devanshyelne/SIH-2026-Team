@@ -8,113 +8,581 @@
 
 /* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
 
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
 html,
 body,
 #root {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
   height: 100%;
 }
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-x: none;
 }
-/* Type scale — scales up in Accessibility Mode */
+
+#root {
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   BOX SIZING / MEDIA
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+
+/* =========================================================
+   TEXT
+   ========================================================= */
+
 .txt-xs {
   font-size: 11px;
   line-height: 15px;
 }
+
 .txt-sm {
   font-size: 13px;
   line-height: 18px;
 }
+
 .txt-base {
   font-size: 15px;
   line-height: 22px;
 }
+
 .txt-lg {
   font-size: 17px;
   line-height: 24px;
 }
+
 .txt-xl {
   font-size: 21px;
   line-height: 27px;
 }
+
 .txt-2xl {
   font-size: 26px;
   line-height: 32px;
 }
+
+
+/* =========================================================
+   ACCESSIBILITY MODE
+   ========================================================= */
+
 .setu-a11y .txt-xs {
   font-size: 13px;
   line-height: 18px;
 }
+
 .setu-a11y .txt-sm {
   font-size: 15px;
   line-height: 21px;
 }
+
 .setu-a11y .txt-base {
   font-size: 17px;
   line-height: 25px;
 }
+
 .setu-a11y .txt-lg {
   font-size: 20px;
   line-height: 28px;
 }
+
 .setu-a11y .txt-xl {
   font-size: 24px;
   line-height: 30px;
 }
+
 .setu-a11y .txt-2xl {
   font-size: 29px;
   line-height: 35px;
 }
+
 .tap {
   min-height: 44px;
 }
+
 .setu-a11y .tap {
   min-height: 56px;
 }
-/* Accessibility Mode raises border contrast */
-.setu-a11y .hairline {
-  border-color: #102a43;
-}
+
+
+/* =========================================================
+   BORDERS
+   ========================================================= */
+
 .hairline {
   border-color: #e2e8f0;
 }
+
+.setu-a11y .hairline {
+  border-color: #102a43;
+}
+
+
+/* =========================================================
+   SCROLLBARS
+   ========================================================= */
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+/* =========================================================
+   RESPONSIVE SAFETY
+   ========================================================= */
+
+/* Prevent flex/grid children from forcing page width */
+.flex,
+.grid {
+  min-width: 0;
+}
+
+/* Long text should wrap rather than push the layout wider */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: anywhere;
+}
+
+/* Better touch interaction */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+
+/* =========================================================
+   SAFE AREA
+   For iPhone notch / home indicator / Android gesture areas
+   ========================================================= */
+
+.safe-area {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+
+/* =========================================================
+   RESPONSIVE SETU CONTAINER
+   ========================================================= */
+
+.setu-container {
+  width: 100%;
+  max-width: 1024px;
+  min-width: 0;
+  margin-inline: auto;
+  padding-inline: clamp(12px, 3vw, 32px);
+}
+
+
+/* =========================================================
+   MAP
+   ========================================================= */
+
+.map-stage {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  bottom: 0;
+
+  /*
+   * Leave enough room for the top controls and bottom route sheet.
+   * clamp() makes this adapt to different screen heights.
+   */
+  padding-top: 92px;
+  padding-bottom: clamp(180px, 34vh, 300px);
+  padding-inline: 8px;
+
+  min-width: 0;
+  overflow: hidden;
+}
+
+.map-sheet {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+
+  z-index: 30;
+
+  max-height: min(52vh, 430px);
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+}
+
+.map-recenter {
+  position: absolute;
+
+  right: 12px;
+  bottom: clamp(190px, 35vh, 315px);
+
+  z-index: 20;
+}
+
+
+/* =========================================================
+   CHATBOT
+   ========================================================= */
+
+.chatbot-window {
+  position: fixed;
+
+  z-index: 60;
+
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+
+  width: auto;
+
+  height: min(70dvh, 640px);
+  max-height: calc(100dvh - 24px);
+
+  overflow: hidden;
+}
+
+.chatbot-button {
+  position: fixed;
+
+  z-index: 50;
+
+  right: 16px;
+  bottom: 16px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 639px) {
+
+  .txt-xs {
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+  .txt-sm {
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .txt-base {
+    font-size: 15px;
+    line-height: 21px;
+  }
+
+  .txt-lg {
+    font-size: 17px;
+    line-height: 23px;
+  }
+
+  .txt-xl {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .txt-2xl {
+    font-size: 24px;
+    line-height: 30px;
+  }
+
+  .setu-container {
+    padding-inline: 12px;
+  }
+
+  /*
+   * Bottom navigation needs to respect phone safe area.
+   */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /*
+   * Mobile chatbot should nearly fill the screen
+   * without touching the edges.
+   */
+  .chatbot-window {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+
+    height: min(78dvh, 600px);
+    max-height: calc(100dvh - 16px);
+
+    border-radius: 18px;
+  }
+
+  .chatbot-button {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  /*
+   * Mobile map gets a little more room for the sheet.
+   */
+  .map-stage {
+    padding-top: 82px;
+    padding-bottom: clamp(175px, 38vh, 290px);
+  }
+
+  .map-recenter {
+    right: 10px;
+    bottom: clamp(185px, 39vh, 305px);
+  }
+
+  .map-sheet {
+    max-height: 55vh;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   320px - 380px
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  .txt-base {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .txt-lg {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  .txt-xl {
+    font-size: 19px;
+    line-height: 25px;
+  }
+
+  .txt-2xl {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  .setu-container {
+    padding-inline: 10px;
+  }
+
+  .chatbot-window {
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+
+    height: min(80dvh, 580px);
+    max-height: calc(100dvh - 12px);
+  }
+
+  .chatbot-button {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .map-stage {
+    padding-inline: 4px;
+    padding-top: 78px;
+  }
+
+  .map-sheet {
+    max-height: 58vh;
+  }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (min-width: 640px) and (max-width: 1023px) {
+
+  .setu-container {
+    padding-inline: 24px;
+  }
+
+  .chatbot-window {
+    left: auto;
+    right: 20px;
+    bottom: 20px;
+
+    width: min(92vw, 400px);
+    height: min(68dvh, 620px);
+  }
+
+  .chatbot-button {
+    right: 20px;
+    bottom: 20px;
+  }
+
+  .map-stage {
+    padding-inline: 12px;
+  }
+}
+
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 1024px) {
+
+  .setu-container {
+    padding-inline: 32px;
+  }
+
+  .chatbot-window {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+
+    width: min(92vw, 384px);
+    height: min(70dvh, 640px);
+  }
+
+  .chatbot-button {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+
+
+/* =========================================================
+   SHORT SCREENS
+   Phones in landscape / small laptop screens
+   ========================================================= */
+
+@media (max-height: 600px) {
+
+  .map-stage {
+    padding-top: 70px;
+    padding-bottom: 145px;
+  }
+
+  .map-sheet {
+    max-height: 48vh;
+  }
+
+  .map-recenter {
+    bottom: 155px;
+  }
+
+  .chatbot-window {
+    height: calc(100dvh - 16px);
+  }
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
 @keyframes setu-dash {
   to {
     stroke-dashoffset: -24;
   }
 }
+
 .route-dash {
   animation: setu-dash 1s linear infinite;
 }
+
 @keyframes setu-pulse {
   0% {
     transform: scale(1);
     opacity: 0.45;
   }
+
   70% {
     transform: scale(2.4);
     opacity: 0;
   }
+
   100% {
     transform: scale(2.4);
     opacity: 0;
   }
 }
+
 .here-pulse {
   transform-origin: center;
   animation: setu-pulse 2s ease-out infinite;
 }
+
+
+/* =========================================================
+   REDUCE MOTION
+   ========================================================= */
+
 @media (prefers-reduced-motion: reduce) {
+
   .route-dash,
   .here-pulse {
     animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
   }
 }
