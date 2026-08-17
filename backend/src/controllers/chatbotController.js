@@ -2,7 +2,7 @@ const askChatbot = async (req, res) => {
     try {
         const { question } = req.body;
 
-        if (!question || !question.trim()) {
+        if (typeof question !== "string" || !question.trim()) {
             return res.status(400).json({
                 message: "Question is required"
             });
@@ -10,7 +10,10 @@ const askChatbot = async (req, res) => {
 
         const chatbotUrl = (process.env.CHATBOT_URL || "http://127.0.0.1:8001")
             .replace(/\/$/, "");
-        const timeout = Number(process.env.CHATBOT_TIMEOUT_MS || 15000);
+        const configuredTimeout = Number(process.env.CHATBOT_TIMEOUT_MS);
+        const timeout = Number.isFinite(configuredTimeout) && configuredTimeout > 0
+            ? configuredTimeout
+            : 15000;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
 

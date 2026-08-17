@@ -3,7 +3,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
-from typing import List, Optional
 
 from rag_core.pdf import (
     DEFAULT_PDF_PATH,
@@ -38,8 +37,7 @@ app.add_middleware(
 
 
 class BuildRequest(BaseModel):
-    pdf_paths: Optional[List[str]] = None
-    reset: Optional[bool] = True
+    reset: bool = True
 
 
 class QueryRequest(BaseModel):
@@ -53,13 +51,16 @@ async def health():
 
 @app.post("/build_db")
 async def build_db(req: BuildRequest):
-    pdfs = req.pdf_paths or [str(DEFAULT_PDF_PATH)]
+    if os.getenv("BUILD_DB_ENABLED") != "true":
+        raise HTTPException(status_code=403, detail="Database build endpoint is disabled")
+
     try:
-        vectorstore, chunk_count = build_vectorstore(pdfs, reset=req.reset)
+        vectorstore, chunk_count = build_vectorstore([str(DEFAULT_PDF_PATH)], reset=req.reset)
         vectorstore.persist()
         return {"status": "ok", "location": str(PERSIST_DIR), "chunks": chunk_count}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        print(f"Database build failed: {exc}")
+        raise HTTPException(status_code=500, detail="Database build failed")
 
 
 @app.post("/query")
@@ -78,4 +79,5 @@ async def query(req: QueryRequest):
         sources = [getattr(d, "metadata", {}).get("source") for d in docs]
         return {"answer": answer, "sources": sources}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        print(f"Chatbot query failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to answer the question")
