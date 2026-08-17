@@ -150,7 +150,7 @@ def ensure_vectorstore(
 def make_retriever(
     vectorstore: Chroma,
     search_type: str = "mmr",
-    k: int = 4,
+    k: int = 20,
     fetch_k: int = 12,
     lambda_mult: float = 0.45,
 ):
