@@ -1,76 +1,153 @@
 services:
+  # ==========================================
+  # FRONTEND
+  # ==========================================
   - type: web
     name: setu-frontend
     runtime: static
     rootDir: Frontend
+
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
+
     autoDeployTrigger: commit
 
+    routes:
+      # ------------------------------------------
+      # API PROXY
+      # Browser:
+      #   /api/anything
+      #
+      # Internally:
+      #   https://setu-backend-keb8.onrender.com/api/anything
+      # ------------------------------------------
+      - type: rewrite
+        source: /api/*
+        destination: https://setu-backend-keb8.onrender.com/api/*
+
+      # ------------------------------------------
+      # REACT / VITE SPA FALLBACK
+      # ------------------------------------------
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+
+  # ==========================================
+  # NODE BACKEND
+  # ==========================================
   - type: web
     name: setu-backend
     runtime: docker
     plan: free
     region: singapore
+
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: .
+
     healthCheckPath: /health
+
     autoDeployTrigger: commit
+
     envVars:
       - key: NODE_ENV
         value: production
+
+      # ------------------------------------------
+      # DATABASE
+      # ------------------------------------------
       - key: DB_HOST
         value: gateway01.ap-southeast-1.prod.aws.tidbcloud.com
+
       - key: DB_PORT
         value: "4000"
+
       - key: DB_NAME
         value: station_navigation
+
       - key: DB_SSL
         value: "true"
+
       - key: DB_USER
         sync: false
+
       - key: DB_PASSWORD
         sync: false
+
+      # ------------------------------------------
+      # CHATBOT SERVICE
+      # ------------------------------------------
       - key: CHATBOT_URL
-        sync: false
+        value: https://setu-chatbot.onrender.com
+
       - key: CHATBOT_TIMEOUT_MS
         value: "90000"
-      - key: CORS_ORIGIN
-        sync: false
 
+      # ------------------------------------------
+      # CROWD ML SERVICE
+      # ------------------------------------------
+      - key: CROWD_MODEL_URL
+        value: https://setu-crowd.onrender.com
+
+      # ------------------------------------------
+      # CORS
+      # ------------------------------------------
+      - key: CORS_ORIGIN
+        value: https://setu-frontend-oiot.onrender.com
+
+
+  # ==========================================
+  # CHATBOT
+  # ==========================================
   - type: web
     name: setu-chatbot
     runtime: docker
     plan: free
     region: singapore
+
     rootDir: CHAT_BOT
     dockerfilePath: ./Dockerfile
     dockerContext: .
+
     healthCheckPath: /health
+
     autoDeployTrigger: commit
+
     envVars:
       - key: MISTRAL_API_KEY
         sync: false
+
       - key: MISTRAL_MODEL
         value: mistral-small-latest
+
       - key: BUILD_DB_ENABLED
         value: "false"
+
       - key: ENABLE_DOCS
         value: "false"
-      - key: CORS_ORIGIN
-        sync: false
 
+      - key: CORS_ORIGIN
+        value: https://setu-backend-keb8.onrender.com
+
+
+  # ==========================================
+  # CROWD MODEL
+  # ==========================================
   - type: web
     name: setu-crowd
     runtime: docker
     plan: free
     region: singapore
+
     rootDir: Crowd-Model-System
     dockerfilePath: ./Dockerfile
     dockerContext: .
+
     healthCheckPath: /
+
     autoDeployTrigger: commit
+
     envVars:
       - key: CORS_ORIGIN
-        sync: false
+        value: https://setu-backend-keb8.onrender.com

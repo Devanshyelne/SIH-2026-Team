@@ -11,6 +11,39 @@
 # dist/
 # **/dist/
 
-CHAT_BOT/.env
-CHAT_BOT/__pycache__/
-CHAT_BOT/rag_core/__pycache__/
+# CHAT_BOT/.env
+# CHAT_BOT/__pycache__/
+# CHAT_BOT/rag_core/__pycache__/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Node
+node_modules/
+dist/
+
+
+# Local IDE/system files
+.DS_Store
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Node
+node_modules/
+dist/
+
+# macOS
+.DS_Store

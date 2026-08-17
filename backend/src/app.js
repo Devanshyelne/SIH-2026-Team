@@ -8,17 +8,20 @@ const crowdRoutes = require("./routes/crowdRoutes");
 const chatbotRoutes = require("./routes/chatbotRoutes");
 
 const app = express();
+
 const allowedOrigins = (process.env.CORS_ORIGIN || "*")
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean);
 
 app.disable("x-powered-by");
+
 app.use(cors({
     origin: allowedOrigins.includes("*") ? "*" : allowedOrigins,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -28,7 +31,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/health", (req, res) => {
-    res.status(200).json({ status: "ok" });
+    res.status(200).json({
+        status: "ok"
+    });
 });
 
 app.use("/api/stations", stationRoutes);
@@ -38,16 +43,9 @@ app.use("/api/crowd", crowdRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 
 app.use((req, res) => {
-    res.status(404).json({ message: "Route not found" });
-});
-
-app.use((error, req, res, next) => {
-    if (error instanceof SyntaxError && "body" in error) {
-        return res.status(400).json({ message: "Invalid JSON payload" });
-    }
-
-    console.error("Unhandled application error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(404).json({
+        message: "Route not found"
+    });
 });
 
 module.exports = app;
