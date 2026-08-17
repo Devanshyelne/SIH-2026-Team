@@ -3,6 +3,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
+import asyncio
+from contextlib import asynccontextmanager
 
 from rag_core.pdf import (
     DEFAULT_PDF_PATH,
@@ -17,7 +19,34 @@ from rag_core.pdf import (
 
 load_dotenv()
 
-app = FastAPI(title="RailSathi RAG API", docs_url="/docs" if os.getenv("ENABLE_DOCS") == "true" else None)
+vectorstore = None
+index_status = "starting"
+index_error = None
+
+
+async def prepare_vectorstore() -> None:
+    global vectorstore, index_status, index_error
+
+    try:
+        vectorstore = await asyncio.to_thread(ensure_vectorstore)
+        index_status = "ready"
+    except Exception as exc:
+        index_error = str(exc)
+        index_status = "failed"
+        print(f"Chatbot index initialization failed: {exc}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(prepare_vectorstore())
+    yield
+
+
+app = FastAPI(
+    title="RailSathi RAG API",
+    docs_url="/docs" if os.getenv("ENABLE_DOCS") == "true" else None,
+    lifespan=lifespan,
+)
 
 allowed_origins = [
     origin.strip()
@@ -46,7 +75,7 @@ class QueryRequest(BaseModel):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "index_status": index_status}
 
 
 @app.post("/build_db")
@@ -71,8 +100,16 @@ async def query(req: QueryRequest):
     if len(question) > 2000:
         raise HTTPException(status_code=400, detail="Question must be 2000 characters or fewer")
 
+    if index_status == "starting":
+        raise HTTPException(
+            status_code=503,
+            detail="Chatbot is initializing. Retry in one minute.",
+        )
+    if index_status == "failed":
+        print(f"Chatbot index is unavailable: {index_error}")
+        raise HTTPException(status_code=503, detail="Chatbot initialization failed. Check service logs.")
+
     try:
-        vectorstore = ensure_vectorstore()
         retriever = make_retriever(vectorstore)
         llm = get_llm(DEFAULT_MODEL)
         answer, docs = answer_question(question, retriever, llm)
