@@ -1,81 +1,34 @@
-# SIH-2026-Team
+# RailSathi
 
-RailSathi is a Streamlit + LangChain chatbot for SIH PS-17: enhancing navigation for railway station facilities and locations.
+RailSathi provides Dadar station navigation, crowd predictions, and a retrieval-augmented chatbot.
 
-## Project structure
+## Services
 
-```text
-SIH-2026-Team/
-├── CHAT_BOT/
-│   ├── app.py
-│   ├── create_database.py
-│   ├── main.py
-│   ├── rag_core/ (package with pdf.py)
-│   │   ├── __init__.py
-│   │   └── pdf.py
-│   ├── api.py (FastAPI backend skeleton)
-│   └── station_data.pdf
-├── .env.example
-├── .gitignore
-├── README.md
-└── requirements.txt
-```
+- `Frontend/`: Vite + React static web interface.
+- `backend/`: Express API backed by MySQL and the chatbot API.
+- `CHAT_BOT/`: FastAPI + Mistral RAG chatbot.
+- `Crowd-Model-System/`: Flask crowd-prediction API.
 
-## Setup
+## Production deployment
+
+Each API service has a Dockerfile. Copy the environment template, then use your deployment platform's secret manager to supply the real values:
 
 ```bash
-git clone <your-github-repo-url>
-cd SIH-2026-Team
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 cp .env.example .env
+docker compose up --build -d
 ```
 
-Add your Mistral API key in `.env` (or other provider keys later):
+The services listen on port `8080` (frontend), `5000` (backend), `8001` (chatbot), and `5001` (crowd model). The MySQL database is intentionally external: create it from `dadar_station_navigation_REBUILT.sql` and set the `DB_*` values before deploying.
 
-```env
-MISTRAL_API_KEY=your_mistral_api_key_here
-MISTRAL_MODEL=mistral-small-latest
-# Optional: switch providers later via AI_PROVIDER env var
-# AI_PROVIDER=mistral  # default
-# AI_PROVIDER=gemini   # example for future switch
-```
+For production, set `CORS_ORIGIN` to the exact deployed frontend URL and store `MISTRAL_API_KEY` only as a secret. Never commit `.env`.
 
-Note: Do not commit `.env` to source control. If using Google Gemini later, set up GOOGLE_APPLICATION_CREDENTIALS pointing to a service account JSON file as required by Google's client libraries.
-
-## Run the chatbot URL
+## Local development
 
 ```bash
-streamlit run CHAT_BOT/app.py
+cd Frontend && npm ci && npm run dev
+cd backend && npm ci && npm run dev
+cd CHAT_BOT && python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
+cd Crowd-Model-System && python -m venv .venv && .venv/Scripts/pip install -r requirements.txt
 ```
 
-Streamlit will show a local URL like:
-
-```text
-http://localhost:8501
-```
-
-Your backend teammate can clone the repo, run the same command, and use their own local Streamlit URL.
-
-## Build the database from terminal
-
-The web app can build the database from the sidebar. You can also prebuild it:
-
-```bash
-python CHAT_BOT/create_database.py
-```
-
-## Terminal chatbot
-
-```bash
-python CHAT_BOT/main.py
-```
-
-Type `0` to exit.
-
-## GitHub notes
-
-- Do not push `.env`; it contains your secret API key.
-- `CHAT_BOT/chroma_db/` is ignored because it can be rebuilt from `station_data.pdf`.
-- Keep `station_data.pdf` only if your team is allowed to share that PDF in the repository.
+Run the chatbot locally with `uvicorn api:app --host 0.0.0.0 --port 8001` from `CHAT_BOT`, and the crowd API with `flask --app app run --port 5001` from `Crowd-Model-System`.

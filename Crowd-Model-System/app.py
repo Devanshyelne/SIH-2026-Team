@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -6,7 +8,8 @@ from crowd_route import choose_low_crowd_route
 
 
 app = Flask(__name__)
-CORS(app)
+allowed_origins = [origin.strip() for origin in os.getenv("CORS_ORIGIN", "*").split(",") if origin.strip()]
+CORS(app, origins=allowed_origins)
 
 
 ZONES = [
@@ -40,6 +43,20 @@ ROUTES = {
 }
 
 
+def request_parameters():
+    try:
+        hour = int(request.args.get("hour", 18))
+        day = int(request.args.get("day", 1))
+        train = int(request.args.get("train", 5))
+    except ValueError:
+        return None, (jsonify({"message": "hour, day, and train must be integers"}), 400)
+
+    if not 0 <= hour <= 23 or not 0 <= day <= 6 or train < 0:
+        return None, (jsonify({"message": "hour must be 0-23, day must be 0-6, and train must be non-negative"}), 400)
+
+    return (hour, day, train), None
+
+
 @app.route("/")
 def home():
     return jsonify({
@@ -51,9 +68,10 @@ def home():
 @app.route("/api/crowd")
 def crowd():
 
-    hour = int(request.args.get("hour", 18))
-    day = int(request.args.get("day", 1))
-    train = int(request.args.get("train", 5))
+    params, error = request_parameters()
+    if error:
+        return error
+    hour, day, train = params
 
     results = []
 
@@ -78,9 +96,10 @@ def crowd():
 @app.route("/api/routes")
 def routes():
 
-    hour = int(request.args.get("hour", 18))
-    day = int(request.args.get("day", 1))
-    train = int(request.args.get("train", 5))
+    params, error = request_parameters()
+    if error:
+        return error
+    hour, day, train = params
 
     results = choose_low_crowd_route(
         ROUTES,
@@ -101,5 +120,5 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         port=5000,
-        debug=True
+        debug=os.getenv("FLASK_DEBUG") == "true"
     )

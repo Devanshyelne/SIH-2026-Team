@@ -1,0 +1,30 @@
+services:
+  frontend:
+    build: ./Frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    env_file: .env
+    environment:
+      PORT: 5000
+      CHATBOT_URL: http://chatbot:8001
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
+  chatbot:
+    build: ./CHAT_BOT
+    env_file: .env
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  crowd-model:
+    build: ./Crowd-Model-System
+    env_file: .env
+    ports:
+      - "5001:5000"
+    restart: unless-stopped

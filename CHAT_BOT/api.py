@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import os
 from typing import List, Optional
 
 from rag_core.pdf import (
@@ -17,14 +18,20 @@ from rag_core.pdf import (
 
 load_dotenv()
 
-app = FastAPI(title="RailSathi RAG API")
+app = FastAPI(title="RailSathi RAG API", docs_url="/docs" if os.getenv("ENABLE_DOCS") == "true" else None)
+
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGIN", "*").split(",")
+    if origin.strip()
+]
 
 # Allow your frontend (React/Vite/etc.) to call this API during dev.
 # Replace "*" with your actual frontend origin(s) before deploying.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=allowed_origins,
+    allow_credentials="*" not in allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -57,11 +64,17 @@ async def build_db(req: BuildRequest):
 
 @app.post("/query")
 async def query(req: QueryRequest):
+    question = req.question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="Question is required")
+    if len(question) > 2000:
+        raise HTTPException(status_code=400, detail="Question must be 2000 characters or fewer")
+
     try:
         vectorstore = ensure_vectorstore()
         retriever = make_retriever(vectorstore)
         llm = get_llm(DEFAULT_MODEL)
-        answer, docs = answer_question(req.question, retriever, llm)
+        answer, docs = answer_question(question, retriever, llm)
         sources = [getattr(d, "metadata", {}).get("source") for d in docs]
         return {"answer": answer, "sources": sources}
     except Exception as exc:

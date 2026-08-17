@@ -8,18 +8,25 @@ const askChatbot = async (req, res) => {
             });
         }
 
-        const chatbotUrl =
-            process.env.CHATBOT_URL || "http://127.0.0.1:8001";
+        const chatbotUrl = (process.env.CHATBOT_URL || "http://127.0.0.1:8001")
+            .replace(/\/$/, "");
+        const timeout = Number(process.env.CHATBOT_TIMEOUT_MS || 15000);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-        const response = await fetch(`${chatbotUrl}/query`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                question: question
-            })
-        });
+        let response;
+        try {
+            response = await fetch(`${chatbotUrl}/query`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question: question.trim() }),
+                signal: controller.signal
+            });
+        } finally {
+            clearTimeout(timeoutId);
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
@@ -37,9 +44,10 @@ const askChatbot = async (req, res) => {
     } catch (error) {
         console.error("Chatbot error:", error.message);
 
-        res.status(500).json({
-            message: "Could not connect to chatbot",
-            error: error.message
+        res.status(error.name === "AbortError" ? 504 : 502).json({
+            message: error.name === "AbortError"
+                ? "Chatbot request timed out"
+                : "Could not connect to chatbot"
         });
     }
 };
