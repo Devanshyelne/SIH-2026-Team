@@ -6,7 +6,7 @@ langchain-community
 langchain-core
 langchain-text-splitters
 langchain-mistralai
+langchain-chroma
 fastapi
 uvicorn[standard]
 rank_bm25
-langchain
