@@ -11,7 +11,7 @@ type Message = {
 const QUICK_QUESTIONS = [
   'Where is the booking office?',
   'How do I reach Platform 5?',
-  'Where is the drinking water?',
+  'I am sick, where can I get medical help?',
 ];
 
 export function Chatbot() {
