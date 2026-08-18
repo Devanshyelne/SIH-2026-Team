@@ -12,11 +12,17 @@ export function Login({
 }: LoginProps) {
   const { login } = useAuth();
 
-  const [identifier, setIdentifier] = useState("");
-  const [password, setPassword] = useState("");
+  const [identifier, setIdentifier] =
+    useState("");
 
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
 
   async function handleSubmit(
     e: React.FormEvent,
@@ -24,11 +30,31 @@ export function Login({
     e.preventDefault();
 
     setError("");
+
+    if (!identifier.trim()) {
+      setError(
+        "Please enter your username or email",
+      );
+      return;
+    }
+
+    if (!password) {
+      setError(
+        "Please enter your password",
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await login(identifier, password);
+      await login(
+        identifier,
+        password,
+      );
+
       onSuccess();
+
     } catch (err) {
       setError(
         err instanceof Error
@@ -43,7 +69,9 @@ export function Login({
   return (
     <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+
         <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8">
+
           <h1 className="text-2xl font-bold text-navy">
             Welcome to SETU
           </h1>
@@ -62,6 +90,7 @@ export function Login({
             onSubmit={handleSubmit}
             className="mt-6 space-y-4"
           >
+
             <div>
               <label className="block text-sm font-medium mb-1">
                 Username or Email
@@ -71,10 +100,13 @@ export function Login({
                 type="text"
                 value={identifier}
                 onChange={(e) =>
-                  setIdentifier(e.target.value)
+                  setIdentifier(
+                    e.target.value,
+                  )
                 }
                 required
-                className="w-full border rounded-xl px-4 py-3"
+                autoComplete="username"
+                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-navy/20"
                 placeholder="Enter username or email"
               />
             </div>
@@ -88,10 +120,13 @@ export function Login({
                 type="password"
                 value={password}
                 onChange={(e) =>
-                  setPassword(e.target.value)
+                  setPassword(
+                    e.target.value,
+                  )
                 }
                 required
-                className="w-full border rounded-xl px-4 py-3"
+                autoComplete="current-password"
+                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-navy/20"
                 placeholder="Enter password"
               />
             </div>
@@ -101,20 +136,27 @@ export function Login({
               disabled={loading}
               className="w-full rounded-xl bg-navy text-white py-3 font-semibold disabled:opacity-50"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading
+                ? "Logging in..."
+                : "Login"}
             </button>
+
           </form>
 
           <p className="text-sm text-center mt-6 text-muted">
             Don't have an account?{" "}
+
             <button
+              type="button"
               onClick={onRegister}
               className="text-navy font-semibold"
             >
               Create account
             </button>
           </p>
+
         </div>
+
       </div>
     </div>
   );

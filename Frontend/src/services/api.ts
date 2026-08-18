@@ -2,18 +2,124 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   "https://setu-backend-keb8.onrender.com";
 
-async function request(path: string, options?: RequestInit) {
-  const response = await fetch(`${API_BASE_URL}${path}`, options);
+export interface AuthUser {
+  id: string;
+  username: string;
+  email: string;
+}
 
-  if (!response.ok) {
-    const errorText = await response.text().catch(() => "");
+export interface AuthResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: AuthUser;
+}
 
-    throw new Error(
-      errorText || `Request failed with status ${response.status}`,
+export interface CurrentUserResponse {
+  success: boolean;
+  message?: string;
+  user?: AuthUser;
+}
+
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}${path}`,
+      {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+        },
+      },
     );
-  }
 
-  return response.json();
+    const text = await response.text();
+
+    let data: any = {};
+
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = {
+        message: text,
+      };
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data?.message ||
+          data?.error ||
+          `Request failed with status ${response.status}`,
+      );
+    }
+
+    return data as T;
+
+  } catch (error) {
+    if (error instanceof TypeError) {
+      throw new Error(
+        "Unable to connect to SETU backend. Please check the backend URL and CORS settings.",
+      );
+    }
+
+    throw error;
+  }
+}
+
+// ==========================================
+// AUTH
+// ==========================================
+
+export async function registerUser(
+  username: string,
+  email: string,
+  password: string,
+): Promise<AuthResponse> {
+  return request<AuthResponse>(
+    "/api/auth/register",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+      }),
+    },
+  );
+}
+
+export async function loginUser(
+  identifier: string,
+  password: string,
+): Promise<AuthResponse> {
+  return request<AuthResponse>(
+    "/api/auth/login",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        identifier,
+        password,
+      }),
+    },
+  );
+}
+
+export async function getCurrentUser(
+  token: string,
+): Promise<CurrentUserResponse> {
+  return request<CurrentUserResponse>(
+    "/api/auth/me",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 }
 
 // ==========================================
@@ -51,19 +157,20 @@ export async function findRoute(
     accessible: String(accessible),
   });
 
-  return request(`/api/journeys/route?${params.toString()}`);
+  return request(
+    `/api/journeys/route?${params.toString()}`,
+  );
 }
 
 // ==========================================
 // CHATBOT
 // ==========================================
 
-export async function askChatbot(question: string) {
+export async function askChatbot(
+  question: string,
+) {
   return request("/api/chatbot", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({
       question,
     }),
@@ -71,7 +178,7 @@ export async function askChatbot(question: string) {
 }
 
 // ==========================================
-// CROWD PREDICTION
+// CROWD DATA
 // ==========================================
 
 export async function getPredictedCrowd(
@@ -85,7 +192,9 @@ export async function getPredictedCrowd(
     train: String(train),
   });
 
-  return request(`/api/crowd?${params.toString()}`);
+  return request(
+    `/api/crowd/predict?${params.toString()}`,
+  );
 }
 
 // ==========================================
@@ -103,6 +212,7 @@ export async function getLowCrowdRoute(
     train: String(train),
   });
 
-  return request(`/api/crowd/routes?${params.toString()}`);
+  return request(
+    `/api/crowd/routes?${params.toString()}`,
+  );
 }
-

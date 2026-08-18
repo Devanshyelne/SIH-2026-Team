@@ -15,31 +15,40 @@ import {
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
+
   login: (
     identifier: string,
     password: string,
   ) => Promise<void>;
+
   register: (
     username: string,
     email: string,
     password: string,
   ) => Promise<void>;
+
   logout: () => void;
+
   isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+const AuthContext =
+  createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] =
+    useState<AuthUser | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("setu_token");
+    const token =
+      localStorage.getItem("setu_token");
 
     if (!token) {
       setLoading(false);
@@ -48,14 +57,23 @@ export function AuthProvider({
 
     getCurrentUser(token)
       .then((response) => {
-        if (response.success && response.user) {
+        if (
+          response.success &&
+          response.user
+        ) {
           setUser(response.user);
         } else {
-          localStorage.removeItem("setu_token");
+          localStorage.removeItem(
+            "setu_token",
+          );
+          setUser(null);
         }
       })
       .catch(() => {
-        localStorage.removeItem("setu_token");
+        localStorage.removeItem(
+          "setu_token",
+        );
+
         setUser(null);
       })
       .finally(() => {
@@ -68,13 +86,18 @@ export function AuthProvider({
     password: string,
   ) {
     const response = await loginUser(
-      identifier,
+      identifier.trim(),
       password,
     );
 
-    if (!response.success || !response.token || !response.user) {
+    if (
+      !response.success ||
+      !response.token ||
+      !response.user
+    ) {
       throw new Error(
-        response.message || "Login failed",
+        response.message ||
+          "Login failed",
       );
     }
 
@@ -91,15 +114,21 @@ export function AuthProvider({
     email: string,
     password: string,
   ) {
-    const response = await registerUser(
-      username,
-      email,
-      password,
-    );
+    const response =
+      await registerUser(
+        username.trim(),
+        email.trim().toLowerCase(),
+        password,
+      );
 
-    if (!response.success || !response.token || !response.user) {
+    if (
+      !response.success ||
+      !response.token ||
+      !response.user
+    ) {
       throw new Error(
-        response.message || "Registration failed",
+        response.message ||
+          "Registration failed",
       );
     }
 
@@ -112,7 +141,10 @@ export function AuthProvider({
   }
 
   function logout() {
-    localStorage.removeItem("setu_token");
+    localStorage.removeItem(
+      "setu_token",
+    );
+
     setUser(null);
   }
 
@@ -133,7 +165,8 @@ export function AuthProvider({
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context =
+    useContext(AuthContext);
 
   if (!context) {
     throw new Error(

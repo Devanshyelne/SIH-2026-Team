@@ -11,12 +11,21 @@ function protect(req, res, next) {
             });
         }
 
-        const token = authHeader.split(" ")[1];
+        const token = authHeader.substring(7).trim();
 
         if (!token) {
             return res.status(401).json({
                 success: false,
                 message: "Authentication token missing"
+            });
+        }
+
+        if (!process.env.JWT_SECRET) {
+            console.error("JWT_SECRET is not configured");
+
+            return res.status(500).json({
+                success: false,
+                message: "Authentication server configuration error"
             });
         }
 

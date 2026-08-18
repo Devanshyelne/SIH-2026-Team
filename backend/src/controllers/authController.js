@@ -3,23 +3,32 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 function generateToken(user) {
-    if (!process.env.JWT_SECRET) {
-        throw new Error("JWT_SECRET is not defined");
+    const secret = process.env.JWT_SECRET;
+
+    if (!secret) {
+        throw new Error("JWT_SECRET is not configured");
     }
 
     return jwt.sign(
         {
-            id: user._id,
+            id: user._id.toString(),
             username: user.username,
             email: user.email
         },
-        process.env.JWT_SECRET,
+        secret,
         {
             expiresIn: process.env.JWT_EXPIRES_IN || "7d"
         }
     );
 }
 
+function sanitizeUser(user) {
+    return {
+        id: user._id.toString(),
+        username: user.username,
+        email: user.email
+    };
+}
 
 // ==========================================
 // REGISTER
@@ -28,9 +37,8 @@ function generateToken(user) {
 
 async function register(req, res) {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password } = req.body || {};
 
-        // Validation
         if (!username || !email || !password) {
             return res.status(400).json({
                 success: false,
@@ -38,13 +46,20 @@ async function register(req, res) {
             });
         }
 
-        const cleanUsername = username.trim();
-        const cleanEmail = email.trim().toLowerCase();
+        const cleanUsername = String(username).trim();
+        const cleanEmail = String(email).trim().toLowerCase();
 
         if (cleanUsername.length < 3) {
             return res.status(400).json({
                 success: false,
                 message: "Username must be at least 3 characters"
+            });
+        }
+
+        if (cleanUsername.length > 30) {
+            return res.status(400).json({
+                success: false,
+                message: "Username must not exceed 30 characters"
             });
         }
 
@@ -55,7 +70,15 @@ async function register(req, res) {
             });
         }
 
-        // Check email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(cleanEmail)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email address"
+            });
+        }
+
         const existingEmail = await User.findOne({
             email: cleanEmail
         });
@@ -67,7 +90,6 @@ async function register(req, res) {
             });
         }
 
-        // Check username
         const existingUsername = await User.findOne({
             username: cleanUsername
         });
@@ -79,34 +101,37 @@ async function register(req, res) {
             });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Create user
         const user = await User.create({
             username: cleanUsername,
             email: cleanEmail,
             password: hashedPassword
         });
 
-        // Generate JWT
         const token = generateToken(user);
 
         return res.status(201).json({
             success: true,
             message: "Account created successfully",
-
             token,
-
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            }
+            user: sanitizeUser(user)
         });
 
     } catch (error) {
         console.error("Register error:", error);
+
+        if (error.code === 11000) {
+            const duplicateField = Object.keys(error.keyPattern || {})[0];
+
+            return res.status(409).json({
+                success: false,
+                message:
+                    duplicateField === "email"
+                        ? "Email is already registered"
+                        : "Username is already taken"
+            });
+        }
 
         return res.status(500).json({
             success: false,
@@ -115,7 +140,6 @@ async function register(req, res) {
     }
 }
 
-
 // ==========================================
 // LOGIN
 // POST /api/auth/login
@@ -123,7 +147,7 @@ async function register(req, res) {
 
 async function login(req, res) {
     try {
-        const { identifier, password } = req.body;
+        const { identifier, password } = req.body || {};
 
         if (!identifier || !password) {
             return res.status(400).json({
@@ -132,16 +156,15 @@ async function login(req, res) {
             });
         }
 
-        const cleanIdentifier = identifier.trim().toLowerCase();
+        const cleanIdentifier = String(identifier).trim();
 
-        // Search using email OR username
         const user = await User.findOne({
             $or: [
                 {
-                    email: cleanIdentifier
+                    email: cleanIdentifier.toLowerCase()
                 },
                 {
-                    username: identifier.trim()
+                    username: cleanIdentifier
                 }
             ]
         }).select("+password");
@@ -153,7 +176,6 @@ async function login(req, res) {
             });
         }
 
-        // Compare password
         const passwordMatches = await bcrypt.compare(
             password,
             user.password
@@ -171,14 +193,8 @@ async function login(req, res) {
         return res.status(200).json({
             success: true,
             message: "Login successful",
-
             token,
-
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            }
+            user: sanitizeUser(user)
         });
 
     } catch (error) {
@@ -191,9 +207,8 @@ async function login(req, res) {
     }
 }
 
-
 // ==========================================
-// GET CURRENT USER
+// CURRENT USER
 // GET /api/auth/me
 // ==========================================
 
@@ -210,12 +225,7 @@ async function getMe(req, res) {
 
         return res.status(200).json({
             success: true,
-
-            user: {
-                id: user._id,
-                username: user.username,
-                email: user.email
-            }
+            user: sanitizeUser(user)
         });
 
     } catch (error) {
@@ -227,7 +237,6 @@ async function getMe(req, res) {
         });
     }
 }
-
 
 module.exports = {
     register,

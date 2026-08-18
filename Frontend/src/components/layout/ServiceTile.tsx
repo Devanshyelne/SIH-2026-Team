@@ -1,69 +1,175 @@
-import React from 'react';
-import { ChevronRightIcon } from 'lucide-react';
+import React from "react";
+
+type Accent =
+  | "navy"
+  | "teal"
+  | "amber"
+  | "red";
+
+interface ServiceTileProps {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  onClick?: () => void;
+  accent?: Accent;
+}
+
+interface QuickLinkTileProps {
+  icon: React.ReactNode;
+  label: string;
+  sublabel?: string;
+  onClick?: () => void;
+}
+
+const accents: Record<Accent, string> = {
+  navy: "bg-[#12385B]/5 text-[#12385B]",
+  teal: "bg-[#0F766E]/8 text-[#0F766E]",
+  amber: "bg-amber-50 text-amber-700",
+  red: "bg-rose-50 text-rose-600",
+};
+
+/* ============================================================
+   SERVICE TILE
+   ============================================================ */
 
 export function ServiceTile({
-  label,
-  description,
   icon,
+  title,
+  subtitle,
   onClick,
-  accent = 'navy',
-}: {
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  accent?: 'navy' | 'teal' | 'amber' | 'red' | 'green';
-}) {
-  const accents = {
-    navy: 'bg-navy/5 text-navy group-hover:bg-navy/10',
-    teal: 'bg-teal-50 text-teal group-hover:bg-teal-100',
-    amber: 'bg-amber-100 text-[#8a5b00] group-hover:bg-amber-200/60',
-    red: 'bg-[#FBE9E9] text-setu-red group-hover:bg-red-100',
-    green: 'bg-[#E7F6EE] text-setu-green group-hover:bg-green-100',
-  };
-
+  accent = "navy",
+}: ServiceTileProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group tap w-full text-left bg-white border hairline rounded-2xl p-4 shadow-card hover:shadow-elevated hover:border-navy/20 transition-all duration-200"
+      className="
+        group
+        w-full
+        rounded-2xl
+        border
+        border-slate-200
+        bg-white
+        p-4
+        text-left
+        shadow-[0_3px_15px_rgba(15,23,42,0.04)]
+        transition-all
+        duration-200
+        hover:-translate-y-0.5
+        hover:border-slate-300
+        hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)]
+        active:scale-[0.99]
+      "
     >
-      <div
-        className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 transition-colors duration-150 ${accents[accent]}`}
-      >
-        {icon}
+      <div className="flex items-start gap-3">
+        <div
+          className={`
+            flex
+            h-11
+            w-11
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            ${accents[accent]}
+          `}
+        >
+          {icon}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <h3 className="font-display text-sm font-bold text-[#12385B]">
+            {title}
+          </h3>
+
+          {subtitle && (
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              {subtitle}
+            </p>
+          )}
+        </div>
+
+        <span
+          className="
+            text-slate-300
+            transition-transform
+            group-hover:translate-x-0.5
+            group-hover:text-[#12385B]
+          "
+          aria-hidden="true"
+        >
+          →
+        </span>
       </div>
-      <p className="font-display font-semibold txt-sm text-navy">{label}</p>
-      <p className="txt-xs text-muted mt-0.5 leading-relaxed">{description}</p>
-      <span className="inline-flex items-center gap-0.5 txt-xs font-semibold text-teal mt-2.5 group-hover:gap-1 transition-all duration-150">
-        Open <ChevronRightIcon className="w-3.5 h-3.5" strokeWidth={2.5} />
-      </span>
     </button>
   );
 }
 
+/* ============================================================
+   QUICK LINK TILE
+   Used by Home.tsx
+   ============================================================ */
+
 export function QuickLinkTile({
+  icon,
   label,
   sublabel,
-  icon,
   onClick,
-}: {
-  label: string;
-  sublabel: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-}) {
+}: QuickLinkTileProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group tap flex flex-col items-center text-center bg-white border hairline rounded-2xl p-4 shadow-card hover:shadow-elevated hover:border-teal/30 transition-all duration-200 min-w-[120px] flex-1"
+      className="
+        group
+        min-w-[150px]
+        shrink-0
+        rounded-2xl
+        border
+        border-slate-200
+        bg-white
+        p-3.5
+        text-left
+        shadow-[0_3px_15px_rgba(15,23,42,0.04)]
+        transition-all
+        duration-200
+        hover:-translate-y-0.5
+        hover:border-slate-300
+        hover:shadow-[0_12px_28px_rgba(15,23,42,0.08)]
+        active:scale-[0.99]
+      "
     >
-      <div className="w-12 h-12 rounded-2xl bg-navy/5 text-navy flex items-center justify-center mb-2.5 group-hover:bg-teal-50 group-hover:text-teal transition-colors duration-150">
-        {icon}
+      <div className="flex items-start gap-3">
+        <div
+          className="
+            flex
+            h-10
+            w-10
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            bg-[#12385B]/5
+            text-[#12385B]
+            transition-colors
+            group-hover:bg-[#12385B]/10
+          "
+        >
+          {icon}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-sm font-bold text-[#12385B]">
+            {label}
+          </p>
+
+          {sublabel && (
+            <p className="mt-1 text-xs leading-relaxed text-slate-500">
+              {sublabel}
+            </p>
+          )}
+        </div>
       </div>
-      <p className="txt-sm font-semibold text-navy">{label}</p>
-      <p className="txt-xs text-muted mt-0.5">{sublabel}</p>
     </button>
   );
 }

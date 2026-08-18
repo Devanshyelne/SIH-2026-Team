@@ -11,8 +11,21 @@ async function connectMongoDB() {
         await mongoose.connect(mongoUri);
 
         console.log("MongoDB connected successfully");
+
+        mongoose.connection.on("error", (error) => {
+            console.error("MongoDB runtime error:", error);
+        });
+
+        mongoose.connection.on("disconnected", () => {
+            console.warn("MongoDB disconnected");
+        });
+
     } catch (error) {
-        console.error("MongoDB connection failed:", error.message);
+        console.error(
+            "MongoDB connection failed:",
+            error.message
+        );
+
         throw error;
     }
 }

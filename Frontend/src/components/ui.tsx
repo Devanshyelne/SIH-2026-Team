@@ -81,28 +81,48 @@ export function Button({
   children,
   ...rest
 }: ButtonProps) {
-  const base =
-    'tap inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-teal disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]';
-
-  const sizes: Record<string, string> = {
-    sm: 'px-3 py-1.5 txt-xs',
-    md: 'px-4 py-2.5 txt-sm',
-    lg: 'px-5 py-3 txt-base',
+  const sizes = {
+    sm: 'px-3 py-2 text-xs',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-5 py-3 text-base',
   };
 
-  const variants: Record<string, string> = {
-    primary: 'bg-navy text-white hover:bg-navy-800 shadow-soft hover:shadow-card',
+  const variants = {
+    primary:
+      'bg-[#12385B] text-white hover:bg-[#0D2D49] shadow-[0_8px_20px_rgba(18,56,91,0.14)]',
+
     secondary:
-      'bg-white text-navy border border-border hover:bg-slate-50 hover:border-slate-300 shadow-soft',
-    ghost: 'text-navy hover:bg-slate-100',
-    danger: 'bg-setu-red text-white hover:bg-[#b93a3a] shadow-soft',
-    teal: 'bg-teal text-white hover:bg-teal-600 shadow-soft',
+      'bg-white text-[#12385B] border border-slate-200 hover:bg-slate-50 hover:border-slate-300',
+
+    ghost:
+      'text-[#12385B] hover:bg-slate-100',
+
+    danger:
+      'bg-[#C83E4D] text-white hover:bg-[#AE3040]',
+
+    teal:
+      'bg-[#0F766E] text-white hover:bg-[#0B625B]',
   };
 
   return (
     <button
       {...rest}
-      className={`${base} ${sizes[size]} ${variants[variant]} ${full ? 'w-full' : ''} ${className}`}
+      className={`
+        inline-flex items-center justify-center gap-2
+        rounded-xl
+        font-bold
+        transition-all duration-150
+        focus:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-[#0F766E]/40
+        disabled:opacity-40
+        disabled:cursor-not-allowed
+        active:scale-[0.985]
+        ${sizes[size]}
+        ${variants[variant]}
+        ${full ? 'w-full' : ''}
+        ${className}
+      `}
     >
       {children}
     </button>
@@ -127,11 +147,26 @@ export function Card({
   padding?: boolean;
 }) {
   const Cmp = as;
+
   return (
     <Cmp
-      className={`bg-white border hairline rounded-2xl shadow-card ${
-        hover ? 'transition-shadow duration-150 hover:shadow-elevated' : ''
-      } ${padding ? 'p-4' : ''} ${className}`}
+      className={`
+        rounded-2xl
+        border border-slate-200
+        bg-white
+        shadow-[0_4px_18px_rgba(15,23,42,0.05)]
+        ${
+          hover
+            ? `
+              transition-all duration-200
+              hover:-translate-y-0.5
+              hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]
+            `
+            : ''
+        }
+        ${padding ? 'p-4' : ''}
+        ${className}
+      `}
     >
       {children}
     </Cmp>
@@ -206,38 +241,65 @@ export function ScreenHeader({
   right?: React.ReactNode;
   tone?: 'light' | 'navy' | 'red';
 }) {
-  const tones = {
-    light: 'bg-white text-navy border-b hairline shadow-soft',
-    navy: 'bg-navy text-white',
-    red: 'bg-setu-red text-white',
-  };
+  const toneClass =
+    tone === 'navy'
+      ? 'bg-[#12385B] text-white'
+      : tone === 'red'
+      ? 'bg-[#C83E4D] text-white'
+      : 'bg-white text-[#12385B] border-b border-slate-200';
 
   return (
-    <header className={`${tones[tone]} px-4 pt-3 pb-3 flex items-start gap-3 shrink-0`}>
+    <header
+      className={`
+        ${toneClass}
+        flex
+        shrink-0
+        items-start
+        gap-3
+        px-4
+        py-3.5
+      `}
+    >
       {onBack && (
         <button
           onClick={onBack}
           aria-label="Back"
-          className={`-ml-1 tap w-10 flex items-center justify-center rounded-xl transition-colors duration-150 ${
-            tone === 'light' ? 'hover:bg-slate-100 text-navy' : 'hover:bg-white/10 text-white'
-          }`}
+          className="
+            flex h-9 w-9
+            items-center justify-center
+            rounded-xl
+            hover:bg-black/5
+          "
         >
-          <ChevronLeftIcon className="w-5 h-5" strokeWidth={2.2} />
+          <ChevronLeftIcon className="h-5 w-5" />
         </button>
       )}
-      <div className="flex-1 min-w-0 py-0.5">
-        <h1 className="font-display font-semibold txt-lg leading-tight">{title}</h1>
+
+      <div className="min-w-0 flex-1">
+        <h1 className="font-display text-lg font-bold leading-tight">
+          {title}
+        </h1>
+
         {subtitle && (
-          <p className={`txt-sm mt-0.5 ${tone === 'light' ? 'text-muted' : 'text-white/75'}`}>
+          <p
+            className={`
+              mt-0.5 text-sm
+              ${
+                tone === 'light'
+                  ? 'text-slate-500'
+                  : 'text-white/70'
+              }
+            `}
+          >
             {subtitle}
           </p>
         )}
       </div>
+
       {right}
     </header>
   );
 }
-
 /* -------------------------------------------------------------------------- */
 /* Badge                                                                      */
 /* -------------------------------------------------------------------------- */
