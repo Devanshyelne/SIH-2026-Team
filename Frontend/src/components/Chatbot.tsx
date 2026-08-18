@@ -9,9 +9,13 @@ type Message = {
 };
 
 const QUICK_QUESTIONS = [
-  'Where is the booking office?',
-  'How do I reach Platform 5?',
-  'I am sick, where can I get medical help?',
+  'How do I get to Exit Gate from Side Gate?',
+  'Starting from Main Entrance Gate, how do I reach Exit Gate?',
+  'Can you tell me each turn from Exit Gate to ATM?',
+  'How do I reach Platform 1 from Main Entrance Gate?',
+  'If I start at Side Gate, where should I go first to reach Toilet 1?',
+  'I have luggage with me. From the Main Entrance Gate, where can I reach the Cloak Room?',
+  'I am at the Cloak Room and need to reach the Help Clinic. What route should I follow?',
 ];
 
 export function Chatbot() {
@@ -49,7 +53,9 @@ export function Chatbot() {
         ...prev,
         {
           role: 'bot',
-          text: data?.answer || "Sorry, I couldn't find an answer for that.",
+          text:
+            (data as { answer?: string })?.answer ||
+            "Sorry, I couldn't find an answer for that.",
         },
       ]);
     } catch (error) {
