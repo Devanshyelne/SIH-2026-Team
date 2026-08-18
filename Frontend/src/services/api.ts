@@ -105,3 +105,65 @@ export async function getLowCrowdRoute(
 
   return request(`/api/crowd/routes?${params.toString()}`);
 }
+
+// ==========================================
+// AUTHENTICATION
+// ==========================================
+
+export interface AuthUser {
+  id: string;
+  username: string;
+  email: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  user?: AuthUser;
+}
+
+export async function loginUser(
+  identifier: string,
+  password: string,
+): Promise<AuthResponse> {
+  return request("/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      identifier,
+      password,
+    }),
+  });
+}
+
+export async function registerUser(
+  username: string,
+  email: string,
+  password: string,
+): Promise<AuthResponse> {
+  return request("/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+    }),
+  });
+}
+
+export async function getCurrentUser(
+  token: string,
+): Promise<AuthResponse> {
+  return request("/api/auth/me", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

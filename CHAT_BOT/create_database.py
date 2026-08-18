@@ -26,8 +26,6 @@ def main() -> None:
         reset=True,
     )
 
-    vectorstore.persist()
-
     print()
     print("================================")
     print("Chroma database created!")

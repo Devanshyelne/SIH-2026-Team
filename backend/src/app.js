@@ -6,6 +6,7 @@ const facilityRoutes = require("./routes/facilityRoutes");
 const journeyRoutes = require("./routes/journeyRoutes");
 const crowdRoutes = require("./routes/crowdRoutes");
 const chatbotRoutes = require("./routes/chatbotRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/facilities", facilityRoutes);
 app.use("/api/journeys", journeyRoutes);
 app.use("/api/crowd", crowdRoutes);
 app.use("/api/chatbot", chatbotRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use((req, res) => {
     res.status(404).json({

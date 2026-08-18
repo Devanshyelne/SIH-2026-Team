@@ -8,3 +8,5 @@ langchain-text-splitters
 langchain-mistralai
 fastapi
 uvicorn[standard]
+rank_bm25
+langchain

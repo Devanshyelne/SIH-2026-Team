@@ -177,6 +177,7 @@ async def query(req: QueryRequest):
 
     try:
 
+        # was: retriever = make_retriever(vectorstore)
         retriever = make_retriever(vectorstore)
 
         llm = get_llm(DEFAULT_MODEL)
@@ -188,7 +189,7 @@ async def query(req: QueryRequest):
         )
 
         sources = [
-            getattr(doc, "metadata", {}).get("source")
+            getattr(doc, "metadata", {}).get("pdf_source")
             for doc in docs
         ]
 
