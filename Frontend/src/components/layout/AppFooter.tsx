@@ -9,12 +9,12 @@ const links = {
 
 export function AppFooter() {
   return (
-    <footer className="bg-navy text-white mt-auto">
+    <footer className="bg-navy text-white mt-auto border-t border-white/5">
       <PageContainer className="py-10 sm:py-12">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="w-9 h-9 rounded-xl bg-amber flex items-center justify-center">
+              <span className="w-10 h-10 rounded-xl bg-amber flex items-center justify-center shadow-soft">
                 <TrainFrontIcon className="w-5 h-5 text-navy-dark" strokeWidth={2.2} />
               </span>
               <div>
@@ -25,8 +25,8 @@ export function AppFooter() {
               </div>
             </div>
             <p className="txt-sm text-white/60 leading-relaxed max-w-xs">
-              Smart indoor navigation for Indian railway stations. Find platforms, coaches, exits and
-              facilities with confidence.
+              Smart indoor navigation for Indian railway stations. Find platforms, coaches, exits
+              and facilities with confidence at Dadar.
             </p>
           </div>
 
@@ -38,9 +38,7 @@ export function AppFooter() {
               <ul className="space-y-2">
                 {items.map((item) => (
                   <li key={item}>
-                    <span className="txt-sm text-white/70 hover:text-white transition-colors">
-                      {item}
-                    </span>
+                    <span className="txt-sm text-white/70">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -50,9 +48,9 @@ export function AppFooter() {
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="txt-xs text-white/40">
-            © {new Date().getFullYear()} SETU · Smart Station Navigator · Prototype
+            © {new Date().getFullYear()} SETU · Smart Station Navigator
           </p>
-          <p className="txt-xs text-white/40">Dadar Railway Station · WR & CR</p>
+          <p className="txt-xs text-white/40">Dadar Railway Station · WR & CR · Mumbai</p>
         </div>
       </PageContainer>
     </footer>

@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   ChevronLeftIcon,
+  EyeIcon,
+  EyeOffIcon,
   Loader2Icon,
   SearchIcon,
   InboxIcon,
@@ -191,11 +193,126 @@ export function Input({ icon, className = '', ...rest }: InputProps) {
       )}
       <input
         {...rest}
-        className={`w-full h-11 rounded-xl border border-border bg-white txt-sm text-navy placeholder:text-muted outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/20 disabled:bg-slate-50 disabled:cursor-not-allowed ${
+        className={`w-full h-11 rounded-xl border border-slate-200 bg-white txt-sm text-navy placeholder:text-muted outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/20 disabled:bg-slate-50 disabled:cursor-not-allowed ${
           icon ? 'pl-10 pr-3' : 'px-3'
         } ${className}`}
       />
     </div>
+  );
+}
+
+interface PasswordInputProps extends Omit<InputProps, 'type'> {
+  label?: string;
+}
+
+export function PasswordInput({
+  icon,
+  className = '',
+  label,
+  id,
+  ...rest
+}: PasswordInputProps) {
+  const [visible, setVisible] = React.useState(false);
+  const inputId = id || 'password-input';
+
+  return (
+    <div className="relative flex items-center">
+      {icon && (
+        <span className="absolute left-3 text-muted pointer-events-none z-10" aria-hidden="true">
+          {icon}
+        </span>
+      )}
+      <input
+        {...rest}
+        id={inputId}
+        type={visible ? 'text' : 'password'}
+        aria-label={label}
+        className={`w-full h-11 rounded-xl border border-slate-200 bg-white txt-sm text-navy placeholder:text-muted outline-none transition-colors duration-150 focus:border-teal focus:ring-2 focus:ring-teal/20 disabled:bg-slate-50 disabled:cursor-not-allowed ${
+          icon ? 'pl-10 pr-11' : 'pl-3 pr-11'
+        } ${className}`}
+      />
+      <button
+        type="button"
+        onClick={() => setVisible((value) => !value)}
+        aria-label={visible ? 'Hide password' : 'Show password'}
+        className="absolute right-3 flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-slate-100 hover:text-navy transition-colors"
+      >
+        {visible ? (
+          <EyeOffIcon className="w-4 h-4" strokeWidth={2} />
+        ) : (
+          <EyeIcon className="w-4 h-4" strokeWidth={2} />
+        )}
+      </button>
+    </div>
+  );
+}
+
+export function FormField({
+  label,
+  htmlFor,
+  error,
+  hint,
+  children,
+}: {
+  label: string;
+  htmlFor: string;
+  error?: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={htmlFor} className="block txt-sm font-semibold text-navy mb-1.5">
+        {label}
+      </label>
+      {children}
+      {hint && !error && (
+        <p className="mt-1 txt-xs text-muted">{hint}</p>
+      )}
+      {error && (
+        <p className="mt-1 txt-xs font-medium text-setu-red" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function Toggle({
+  checked,
+  onChange,
+  label,
+  description,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  label: string;
+  description?: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+      <span className="min-w-0">
+        <span className="block txt-sm font-semibold text-navy">{label}</span>
+        {description && (
+          <span className="block txt-xs text-muted mt-0.5">{description}</span>
+        )}
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        onClick={() => onChange(!checked)}
+        className={`relative h-7 w-12 shrink-0 rounded-full transition-colors duration-200 ${
+          checked ? 'bg-teal' : 'bg-slate-300'
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow-soft transition-transform duration-200 ${
+            checked ? 'translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </button>
+    </label>
   );
 }
 

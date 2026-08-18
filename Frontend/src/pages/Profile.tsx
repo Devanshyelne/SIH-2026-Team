@@ -4,17 +4,20 @@ import {
   BellIcon,
   FlagIcon,
   LanguagesIcon,
+  LogInIcon,
   LogOutIcon,
   ShieldIcon,
   TrainFrontIcon,
   UserIcon,
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { useSetu } from '../contexts/SetuContext';
 import { PageContainer, PageHero, PageSection } from '../components/layout/PageContainer';
-import { Button, Card } from '../components/ui';
+import { Badge, Button, Card } from '../components/ui';
 
 export function Profile() {
   const { a11y, setMode, reset, openOverlay } = useSetu();
+  const { user, isAuthenticated, logout, showLogin, showRegister } = useAuth();
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar bg-canvas">
@@ -22,13 +25,33 @@ export function Profile() {
 
       <PageContainer className="pb-10">
         <Card className="p-5 sm:p-6 flex items-center gap-4 -mt-2 relative z-10 shadow-elevated" hover>
-          <span className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy to-navy-800 text-white flex items-center justify-center shadow-soft shrink-0">
-            <UserIcon className="w-8 h-8" strokeWidth={1.8} />
+          <span className="w-16 h-16 rounded-2xl bg-navy text-white flex items-center justify-center shadow-soft shrink-0 font-display font-bold text-2xl">
+            {isAuthenticated && user
+              ? user.username.charAt(0).toUpperCase()
+              : <UserIcon className="w-8 h-8" strokeWidth={1.8} />}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-semibold text-xl text-navy">Pallavi Lotlikar</p>
-            <p className="txt-sm text-muted mt-0.5">Mumbai · Western & Central lines</p>
-            <p className="txt-xs text-muted mt-1">Member since 2024</p>
+            {isAuthenticated && user ? (
+              <>
+                <p className="font-display font-semibold text-xl text-navy truncate">{user.username}</p>
+                <p className="txt-sm text-muted mt-0.5 truncate">{user.email}</p>
+                <Badge variant="success" className="mt-2">Signed in</Badge>
+              </>
+            ) : (
+              <>
+                <p className="font-display font-semibold text-xl text-navy">Guest traveller</p>
+                <p className="txt-sm text-muted mt-0.5">Sign in to save preferences</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={showLogin}>
+                    <LogInIcon className="w-4 h-4" strokeWidth={2} />
+                    Login
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={showRegister}>
+                    Register
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </Card>
 
@@ -69,7 +92,7 @@ export function Profile() {
         </PageSection>
 
         <PageSection title="Preferences">
-          <Card className="divide-y divide-border overflow-hidden">
+          <Card className="divide-y divide-slate-200 overflow-hidden">
             {[
               { Icon: BellIcon, label: 'Alerts', detail: 'Platform change, crowd, delays' },
               { Icon: LanguagesIcon, label: 'Language', detail: 'English · मराठी · हिन्दी' },
@@ -106,12 +129,17 @@ export function Profile() {
         </PageSection>
 
         <PageSection title="Account">
-          <Button variant="secondary" full onClick={reset}>
-            <LogOutIcon className="w-4 h-4" strokeWidth={2} />
+          {isAuthenticated ? (
+            <Button variant="danger" full onClick={logout}>
+              <LogOutIcon className="w-4 h-4" strokeWidth={2} />
+              Logout
+            </Button>
+          ) : null}
+          <Button variant="secondary" full className={isAuthenticated ? 'mt-3' : ''} onClick={reset}>
             Change mode and restart SETU
           </Button>
           <p className="txt-xs text-muted text-center mt-3">
-            SETU · Smart Station Navigator · Prototype v3
+            SETU · Smart Station Navigator · Dadar Railway Station
           </p>
         </PageSection>
       </PageContainer>
