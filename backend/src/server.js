@@ -6,11 +6,22 @@ const connectMongoDB = require("./config/db_mongo");
 const PORT = Number(process.env.PORT) || 5000;
 const HOST = "0.0.0.0";
 
+function validateEnvironment() {
+    if (!process.env.MONGODB_URI) {
+        throw new Error("MONGODB_URI is required");
+    }
+
+    if (!process.env.JWT_SECRET) {
+        throw new Error("JWT_SECRET is required");
+    }
+}
+
 
 async function startServer() {
     try {
+        validateEnvironment();
 
-        // Connect MongoDB
+        // Connect MongoDB before starting Express
         await connectMongoDB();
 
         // Start Express server

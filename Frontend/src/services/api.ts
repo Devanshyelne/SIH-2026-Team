@@ -20,17 +20,26 @@ export interface CurrentUserResponse {
   user?: AuthUser;
 }
 
+export function getAuthToken(): string | null {
+  return localStorage.getItem("setu_token");
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
   try {
+    const token = getAuthToken();
+
     const response = await fetch(
       `${API_BASE_URL}${path}`,
       {
         ...options,
         headers: {
           "Content-Type": "application/json",
+          ...(token
+            ? { Authorization: `Bearer ${token}` }
+            : {}),
           ...(options.headers || {}),
         },
       },
@@ -38,26 +47,23 @@ async function request<T>(
 
     const text = await response.text();
 
-    let data: any = {};
+    let data: Record<string, unknown> = {};
 
     try {
       data = text ? JSON.parse(text) : {};
     } catch {
-      data = {
-        message: text,
-      };
+      data = { message: text };
     }
 
     if (!response.ok) {
       throw new Error(
-        data?.message ||
-          data?.error ||
+        (data?.message as string) ||
+          (data?.error as string) ||
           `Request failed with status ${response.status}`,
       );
     }
 
     return data as T;
-
   } catch (error) {
     if (error instanceof TypeError) {
       throw new Error(

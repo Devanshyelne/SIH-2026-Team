@@ -1,201 +1,223 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  LockIcon,
+  MailIcon,
+  TrainFrontIcon,
+  UserIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import {
+  Button,
+  Card,
+  FormField,
+  Input,
+  LoadingSpinner,
+  PasswordInput,
+} from "../components/ui";
 
 interface RegisterProps {
   onLogin: () => void;
   onSuccess: () => void;
 }
 
-export function Register({
-  onLogin,
-  onSuccess,
-}: RegisterProps) {
-  const { register } = useAuth();
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const [username, setUsername] =
-    useState("");
+export function Register({ onLogin, onSuccess }: RegisterProps) {
+  const { register, isAuthenticated, closeAuthPage } = useAuth();
 
-  const [email, setEmail] =
-    useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
 
-  const [password, setPassword] =
-    useState("");
+  useEffect(() => {
+    if (isAuthenticated) {
+      onSuccess();
+    }
+  }, [isAuthenticated, onSuccess]);
 
-  const [confirmPassword, setConfirmPassword] =
-    useState("");
+  function validate() {
+    const next: Record<string, string> = {};
 
-  const [error, setError] =
-    useState("");
+    if (username.trim().length < 3) {
+      next.username = "Username must be at least 3 characters";
+    }
 
-  const [loading, setLoading] =
-    useState(false);
-
-  async function handleSubmit(
-    e: React.FormEvent,
-  ) {
-    e.preventDefault();
-
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError(
-        "Passwords do not match",
-      );
-      return;
+    if (!EMAIL_REGEX.test(email.trim())) {
+      next.email = "Please enter a valid email address";
     }
 
     if (password.length < 6) {
-      setError(
-        "Password must be at least 6 characters",
-      );
-      return;
+      next.password = "Password must be at least 6 characters";
     }
+
+    if (password !== confirmPassword) {
+      next.confirmPassword = "Passwords do not match";
+    }
+
+    setFieldErrors(next);
+    return Object.keys(next).length === 0;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+
+    if (!validate()) return;
+    if (loading) return;
 
     setLoading(true);
 
     try {
-      await register(
-        username,
-        email,
-        password,
-      );
-
+      await register(username, email, password);
       onSuccess();
-
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Registration failed",
-      );
+      setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-elevated p-6 sm:p-8">
+    <div className="min-h-screen bg-canvas flex flex-col">
+      <div className="bg-navy text-white px-4 py-8 sm:py-10">
+        <div className="mx-auto max-w-md flex items-center gap-3">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber text-navy-dark shadow-soft">
+            <TrainFrontIcon className="h-6 w-6" strokeWidth={2.2} />
+          </span>
+          <div>
+            <p className="font-display font-bold text-2xl tracking-tight">SETU</p>
+            <p className="text-xs tracking-[0.14em] text-amber/90 font-medium">
+              SMART STATION NAVIGATOR
+            </p>
+          </div>
+        </div>
+      </div>
 
-          <h1 className="text-2xl font-bold text-navy">
-            Create your SETU account
-          </h1>
-
-          <p className="text-muted mt-1">
-            Sign up to continue
+      <div className="flex-1 flex items-start sm:items-center justify-center p-4 -mt-6 pb-8">
+        <Card className="w-full max-w-md p-6 sm:p-8 shadow-elevated">
+          <h1 className="font-display font-bold text-2xl text-navy">Create your account</h1>
+          <p className="txt-sm text-muted mt-1">
+            Join SETU for personalised station navigation at Dadar
           </p>
 
           {error && (
-            <div className="mt-4 p-3 rounded-xl bg-red-50 text-red-700 text-sm">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 txt-sm text-setu-red" role="alert">
               {error}
             </div>
           )}
 
-          <form
-            onSubmit={handleSubmit}
-            className="mt-6 space-y-4"
-          >
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Username
-              </label>
-
-              <input
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
+            <FormField
+              label="Username"
+              htmlFor="register-username"
+              error={fieldErrors.username}
+              hint="3–30 characters"
+            >
+              <Input
+                id="register-username"
                 type="text"
                 value={username}
-                onChange={(e) =>
-                  setUsername(e.target.value)
-                }
+                onChange={(e) => setUsername(e.target.value)}
                 minLength={3}
                 maxLength={30}
-                required
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-navy/20"
-                placeholder="Enter username"
+                autoComplete="username"
+                placeholder="Choose a username"
+                icon={<UserIcon className="w-4 h-4" strokeWidth={2} />}
+                disabled={loading}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Email
-              </label>
-
-              <input
+            <FormField
+              label="Email"
+              htmlFor="register-email"
+              error={fieldErrors.email}
+            >
+              <Input
+                id="register-email"
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                required
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-navy/20"
-                placeholder="Enter email"
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                placeholder="you@example.com"
+                icon={<MailIcon className="w-4 h-4" strokeWidth={2} />}
+                disabled={loading}
               />
-            </div>
+            </FormField>
 
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Password
-              </label>
-
-              <input
-                type="password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                minLength={6}
-                required
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-navy/20"
-                placeholder="Create password"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Confirm Password
-              </label>
-
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) =>
-                  setConfirmPassword(
-                    e.target.value,
-                  )
-                }
-                minLength={6}
-                required
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-navy/20"
-                placeholder="Confirm password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-navy text-white py-3 font-semibold disabled:opacity-50"
+            <FormField
+              label="Password"
+              htmlFor="register-password"
+              error={fieldErrors.password}
+              hint="At least 6 characters"
             >
-              {loading
-                ? "Creating account..."
-                : "Create account"}
-            </button>
+              <PasswordInput
+                id="register-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                autoComplete="new-password"
+                placeholder="Create a password"
+                icon={<LockIcon className="w-4 h-4" strokeWidth={2} />}
+                disabled={loading}
+              />
+            </FormField>
 
+            <FormField
+              label="Confirm password"
+              htmlFor="register-confirm"
+              error={fieldErrors.confirmPassword}
+            >
+              <PasswordInput
+                id="register-confirm"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                minLength={6}
+                autoComplete="new-password"
+                placeholder="Confirm your password"
+                icon={<LockIcon className="w-4 h-4" strokeWidth={2} />}
+                disabled={loading}
+              />
+            </FormField>
+
+            <Button type="submit" full size="lg" disabled={loading}>
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" className="text-white" />
+                  Creating account…
+                </>
+              ) : (
+                <>
+                  <UserPlusIcon className="w-4 h-4" strokeWidth={2} />
+                  Create account
+                </>
+              )}
+            </Button>
           </form>
 
-          <p className="text-sm text-center mt-6 text-muted">
+          <p className="txt-sm text-center mt-6 text-muted">
             Already have an account?{" "}
-
             <button
               type="button"
               onClick={onLogin}
-              className="text-navy font-semibold"
+              className="font-semibold text-teal hover:underline underline-offset-2"
             >
-              Login
+              Sign in
             </button>
           </p>
 
-        </div>
+          <button
+            type="button"
+            onClick={closeAuthPage}
+            className="mt-4 w-full txt-sm font-medium text-muted hover:text-navy transition-colors"
+          >
+            Continue without signing in →
+          </button>
+        </Card>
       </div>
     </div>
   );
