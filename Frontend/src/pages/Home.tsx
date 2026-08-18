@@ -2,18 +2,80 @@ import React from 'react';
 import {
   AccessibilityIcon,
   ArrowRightIcon,
+  BotIcon,
+  ChevronDownIcon,
   DoorOpenIcon,
   HeartPulseIcon,
   LayoutGridIcon,
+  MapIcon,
   MapPinIcon,
+  NavigationIcon,
   SearchIcon,
+  ShieldIcon,
   TrainFrontIcon,
   TriangleAlertIcon,
-  UsersIcon } from
-'lucide-react';
+  UsersIcon,
+  UtensilsIcon,
+  WifiIcon,
+} from 'lucide-react';
 import { useSetu } from '../contexts/SetuContext';
-import { Button, Card, CrowdTag, Mono, SectionLabel } from '../components/ui';
-import { platformRoute } from '../data/station';
+import { AppFooter } from '../components/layout/AppFooter';
+import { PageContainer, PageSection } from '../components/layout/PageContainer';
+import { QuickLinkTile, ServiceTile } from '../components/layout/ServiceTile';
+import {
+  Badge,
+  Button,
+  Card,
+  CrowdTag,
+  Mono,
+  StatTile,
+  AlertBanner,
+} from '../components/ui';
+import { platformRoute, crowdAreas } from '../data/station';
+
+const FAQ = [
+  {
+    q: 'How does SETU help me navigate Dadar station?',
+    a: 'SETU provides indoor walking directions from your current location to platforms, coaches, exits and facilities. It recalculates routes when platforms change or crowd levels shift.',
+  },
+  {
+    q: 'Can SETU work in accessibility mode?',
+    a: 'Yes. Accessibility mode enables larger controls, voice guidance, step-free route priority, and higher contrast throughout the app.',
+  },
+  {
+    q: 'How accurate is the live crowd information?',
+    a: 'Crowd levels are estimated using anonymised device density, daily movement patterns, and historical event data. They update every 30 seconds.',
+  },
+  {
+    q: 'What should I do in a medical emergency?',
+    a: 'Tap "I feel unwell" on the home screen or use the Medical section to find the nearest hospital, station medical assistance, or call Railway Helpline 139.',
+  },
+];
+
+function FaqItem({ q, a }: { q: string; a: string }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="border hairline rounded-xl overflow-hidden bg-white">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="tap w-full flex items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-slate-50 transition-colors duration-150"
+      >
+        <span className="txt-sm font-semibold text-navy">{q}</span>
+        <ChevronDownIcon
+          className={`w-4 h-4 text-muted shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          strokeWidth={2}
+        />
+      </button>
+      {open && (
+        <div className="px-4 pb-4 txt-sm text-muted leading-relaxed border-t hairline pt-3 animate-fade-in">
+          {a}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Home() {
   const {
@@ -24,203 +86,475 @@ export function Home() {
     openOverlay,
     setTab,
     navigateTo,
-    triggerPlatformChange
+    triggerPlatformChange,
   } = useSetu();
 
-  const quickActions = [
-  { id: 'find', label: 'Find Me', Icon: MapPinIcon, onClick: () => openOverlay('findMe') },
-  {
-    id: 'platform',
-    label: 'Find Platform',
-    Icon: TrainFrontIcon,
-    onClick: () => navigateTo(platformRoute(platform, a11y))
-  },
-  { id: 'coach', label: 'Coach Finder', Icon: LayoutGridIcon, onClick: () => setTab('coach') },
-  { id: 'exit', label: 'Find Exit', Icon: DoorOpenIcon, onClick: () => openOverlay('exits') }];
+  const [search, setSearch] = React.useState('');
 
+  const avgCrowd = festival ? 'Very High' : 'Moderate';
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar bg-canvas">
-      <div className="bg-navy text-white px-4 pt-4 pb-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-display font-bold txt-lg leading-none tracking-tight">SETU</p>
-            <p className="txt-sm text-white/70 mt-1">Dadar Railway Station</p>
-          </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 txt-xs font-medium">
-            {a11y ?
-            <>
-                <AccessibilityIcon className="w-3.5 h-3.5" strokeWidth={2} /> Accessibility
-              </> :
-
-            'Normal Mode'
-            }
-          </span>
+      {/* ── HERO ── */}
+      <section className="gradient-mesh text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-30" aria-hidden="true">
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-amber/10 -translate-y-1/2 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-teal/10 translate-y-1/2 -translate-x-1/4" />
         </div>
-
-        <h1 className="font-display font-semibold txt-xl mt-5">Where are you going?</h1>
-        <button
-          onClick={() => openOverlay('findMe')}
-          className="tap mt-3 w-full bg-white rounded-lg px-3 flex items-center gap-2.5 text-left">
-          
-          <SearchIcon className="w-5 h-5 text-muted shrink-0" strokeWidth={2} />
-          <span className="txt-sm text-muted truncate">
-            Search platform, facility, exit or destination
-          </span>
-        </button>
-      </div>
-
-      <div className="px-4 py-4 space-y-4">
-        {platformChanged &&
-        <button
-          onClick={() => navigateTo(platformRoute(platform, a11y))}
-          className="w-full text-left rounded-xl border-l-4 border-amber bg-[#FDF3DC] border-y border-r border-y-[#f0e0bb] border-r-[#f0e0bb] p-3 flex items-start gap-2.5">
-          
-            <TriangleAlertIcon className="w-5 h-5 text-[#8a5b00] shrink-0" strokeWidth={2} />
-            <span className="flex-1">
-              <span className="block txt-sm font-semibold text-navy">
-                Platform changed to <Mono>7</Mono>
-              </span>
-              <span className="block txt-sm text-[#8a5b00]">
-                New route recalculated · 3 min walk
-              </span>
-            </span>
-            <ArrowRightIcon className="w-4 h-4 text-[#8a5b00] mt-0.5" strokeWidth={2.2} />
-          </button>
-        }
-
-        {/* Live journey */}
-        <section aria-labelledby="live-journey">
-          <div className="flex items-center justify-between mb-2">
-            <h2
-              id="live-journey"
-              className="txt-xs font-semibold tracking-[0.12em] uppercase text-muted">
-              
-              Live Journey
-            </h2>
-            <span className="inline-flex items-center gap-1.5 txt-xs font-medium text-setu-green">
-              <span className="w-1.5 h-1.5 rounded-full bg-setu-green" aria-hidden="true" />
-              ON TIME
-            </span>
+        <PageContainer className="relative py-10 sm:py-14 lg:py-16">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Badge variant={a11y ? 'teal' : 'default'}>
+              {a11y ? (
+                <>
+                  <AccessibilityIcon className="w-3 h-3" strokeWidth={2} />
+                  Accessibility Mode
+                </>
+              ) : (
+                'Normal Mode'
+              )}
+            </Badge>
+            <Badge variant="success">
+              <span className="w-1.5 h-1.5 rounded-full bg-setu-green animate-pulse-soft" />
+              Station Operational
+            </Badge>
           </div>
-          <Card className="overflow-hidden">
-            <div className="p-4">
-              <p className="font-display font-semibold txt-base">Mumbai Central → Thane</p>
-              <p className="txt-sm text-muted">Fast local · 12 coaches</p>
 
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <div>
-                  <p className="txt-xs text-muted uppercase tracking-wider">Platform</p>
-                  <Mono className="txt-xl font-semibold text-navy">{platform}</Mono>
-                </div>
-                <div>
-                  <p className="txt-xs text-muted uppercase tracking-wider">Departs</p>
-                  <Mono className="txt-xl font-semibold text-navy">08:42</Mono>
-                </div>
-                <div>
-                  <p className="txt-xs text-muted uppercase tracking-wider">Coach</p>
-                  <Mono className="txt-xl font-semibold text-navy">D3</Mono>
-                </div>
+          <h1 className="font-display font-bold text-3xl sm:text-4xl lg:text-[2.75rem] tracking-tight leading-tight max-w-2xl">
+            Navigate Dadar Station with confidence
+          </h1>
+          <p className="txt-base sm:txt-lg text-white/70 mt-3 max-w-xl leading-relaxed">
+            Smart indoor navigation for platforms, coaches, exits and facilities — with live crowd
+            updates and accessibility-first routing.
+          </p>
+
+          {/* Search box */}
+          <div className="mt-8 bg-white rounded-2xl shadow-elevated p-1.5 sm:p-2 max-w-2xl">
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex-1 flex items-center gap-2.5 px-3 py-2">
+                <SearchIcon className="w-5 h-5 text-muted shrink-0" strokeWidth={2} />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && openOverlay('findMe')}
+                  placeholder="Search platform, exit, coach or facility..."
+                  aria-label="Search station"
+                  className="flex-1 bg-transparent txt-sm text-navy placeholder:text-muted outline-none min-w-0"
+                />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 px-4 pb-4">
-              <Button variant="secondary" onClick={() => setTab('journey')}>
-                View journey
-              </Button>
-              <Button onClick={() => navigateTo(platformRoute(platform, a11y))}>
+              <Button
+                size="lg"
+                className="sm:px-8 rounded-xl"
+                onClick={() => openOverlay('findMe')}
+              >
+                <NavigationIcon className="w-4 h-4" strokeWidth={2} />
                 Navigate
               </Button>
             </div>
-          </Card>
-        </section>
+            <div className="flex flex-wrap gap-2 px-3 pb-2 pt-1">
+              {['Platform 5', 'Exit B', 'Washroom', 'Food Court'].map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => {
+                    setSearch(chip);
+                    openOverlay('findMe');
+                  }}
+                  className="txt-xs font-medium text-muted hover:text-navy bg-slate-50 hover:bg-slate-100 rounded-full px-2.5 py-1 transition-colors duration-150"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Contextual crowd advisory */}
-        {festival &&
-        <Card className="p-3.5">
-            <div className="flex items-start gap-2.5">
-              <UsersIcon className="w-5 h-5 text-setu-red shrink-0 mt-0.5" strokeWidth={2} />
-              <div className="flex-1">
-                <p className="txt-sm font-semibold text-navy">High crowd detected</p>
-                <p className="txt-sm text-muted">
-                  Ganpati festival movement near the Main FOB and Exit B.
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <CrowdTag level="Very High" />
-                  <button
+          {/* Secondary CTAs */}
+          <div className="mt-5 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => navigateTo(platformRoute(platform, a11y))}
+              className="inline-flex items-center gap-2 txt-sm font-semibold text-white/90 hover:text-white transition-colors duration-150"
+            >
+              <TrainFrontIcon className="w-4 h-4" strokeWidth={2} />
+              Go to Platform {platform}
+              <ArrowRightIcon className="w-4 h-4" strokeWidth={2.2} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('map')}
+              className="inline-flex items-center gap-2 txt-sm font-semibold text-white/90 hover:text-white transition-colors duration-150"
+            >
+              <MapIcon className="w-4 h-4" strokeWidth={2} />
+              Open Station Map
+              <ArrowRightIcon className="w-4 h-4" strokeWidth={2.2} />
+            </button>
+          </div>
+        </PageContainer>
+      </section>
+
+      <PageContainer>
+        {/* ── QUICK SERVICES ── */}
+        <PageSection title="Station Services" subtitle="Quick access to everything you need">
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
+            <QuickLinkTile
+              label="Live Crowd"
+              sublabel="Updated 30s ago"
+              icon={<UsersIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => openOverlay('crowd')}
+            />
+            <QuickLinkTile
+              label="Find Exit"
+              sublabel="Best route out"
+              icon={<DoorOpenIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => openOverlay('exits')}
+            />
+            <QuickLinkTile
+              label="Coach Finder"
+              sublabel="Where to stand"
+              icon={<TrainFrontIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => setTab('coach')}
+            />
+            <QuickLinkTile
+              label="Medical"
+              sublabel="Emergency help"
+              icon={<HeartPulseIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => openOverlay('medical')}
+            />
+            <QuickLinkTile
+              label="Station Map"
+              sublabel="Indoor navigation"
+              icon={<MapIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => setTab('map')}
+            />
+          </div>
+        </PageSection>
+
+        {/* ── ALERTS ── */}
+        {platformChanged && (
+          <AlertBanner
+            variant="warning"
+            icon={<TriangleAlertIcon className="w-5 h-5 text-[#8a5b00]" strokeWidth={2} />}
+            onClick={() => navigateTo(platformRoute(platform, a11y))}
+            action={<ArrowRightIcon className="w-4 h-4 text-[#8a5b00]" strokeWidth={2.2} />}
+          >
+            <span className="block font-semibold">
+              Platform changed to <Mono>7</Mono>
+            </span>
+            <span className="block text-[#8a5b00] mt-0.5">
+              New route recalculated · 3 min walk
+            </span>
+          </AlertBanner>
+        )}
+
+        {/* ── LIVE STATUS + JOURNEY ── */}
+        <div className="grid lg:grid-cols-5 gap-5 py-2">
+          {/* Live station status */}
+          <div className="lg:col-span-2">
+            <PageSection title="Live Station Status" subtitle="Dadar · WR & CR">
+              <Card className="p-4 h-full">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="txt-sm text-muted">Overall crowd</span>
+                    <CrowdTag level={avgCrowd as 'Moderate' | 'Very High'} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="txt-sm text-muted">Your platform</span>
+                    <Mono className="font-semibold text-navy txt-lg">{platform}</Mono>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="txt-sm text-muted">Train status</span>
+                    <Badge variant="success">On Time</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="txt-sm text-muted">Network</span>
+                    <span className="txt-sm font-medium text-navy flex items-center gap-1">
+                      <WifiIcon className="w-3.5 h-3.5 text-teal" strokeWidth={2} />
+                      Available
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="secondary"
+                  full
+                  className="mt-4"
                   onClick={() => openOverlay('crowd')}
-                  className="txt-sm font-semibold text-teal underline underline-offset-2">
-                  
-                    See live crowd
-                  </button>
+                >
+                  View detailed crowd map
+                </Button>
+              </Card>
+            </PageSection>
+          </div>
+
+          {/* Live journey */}
+          <div className="lg:col-span-3">
+            <PageSection
+              title="Your Journey"
+              subtitle="Mumbai Central → Thane"
+              action={
+                <Badge variant="success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-setu-green animate-pulse-soft" />
+                  ON TIME
+                </Badge>
+              }
+            >
+              <Card className="overflow-hidden h-full" hover>
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-display font-semibold text-lg text-navy">
+                        Mumbai Central → Thane
+                      </p>
+                      <p className="txt-sm text-muted mt-0.5">Fast local · 12 coaches · CR corridor</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    <StatTile label="Platform" value={platform} />
+                    <StatTile label="Departs" value="08:42" />
+                    <StatTile label="Coach" value="D3" sub="Second Class" />
+                  </div>
+                </div>
+                <div className="border-t hairline p-4 grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50/50">
+                  <Button variant="secondary" onClick={() => setTab('journey')}>
+                    Journey details
+                  </Button>
+                  <Button variant="secondary" onClick={() => setTab('coach')}>
+                    Find coach
+                  </Button>
+                  <Button
+                    className="col-span-2 sm:col-span-1"
+                    onClick={() => navigateTo(platformRoute(platform, a11y))}
+                  >
+                    Navigate now
+                  </Button>
+                </div>
+              </Card>
+            </PageSection>
+          </div>
+        </div>
+
+        {/* ── FESTIVAL ALERT ── */}
+        {festival && (
+          <Card className="p-5 border-l-4 border-l-setu-red mb-2">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#FBE9E9] flex items-center justify-center shrink-0">
+                <UsersIcon className="w-6 h-6 text-setu-red" strokeWidth={2} />
+              </div>
+              <div className="flex-1">
+                <p className="font-display font-semibold text-navy">High crowd — Ganpati festival</p>
+                <p className="txt-sm text-muted mt-1">
+                  Large movement near Main FOB and Exit B. Alternative routes available.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <CrowdTag level="Very High" />
+                  <Button size="sm" variant="secondary" onClick={() => openOverlay('crowd')}>
+                    View crowd dashboard
+                  </Button>
                 </div>
               </div>
             </div>
           </Card>
-        }
+        )}
 
-        {/* Quick actions */}
-        <section aria-labelledby="quick-actions">
-          <h2
-            id="quick-actions"
-            className="txt-xs font-semibold tracking-[0.12em] uppercase text-muted mb-2">
-            
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-2 gap-2">
-            {quickActions.map(({ id, label, Icon, onClick }) =>
-            <button
-              key={id}
-              onClick={onClick}
-              className="tap bg-white border hairline rounded-xl px-3 py-3 flex items-center gap-2.5 text-left hover:border-navy transition-colors duration-150 ease-out">
-              
-                <Icon className="w-5 h-5 text-navy shrink-0" strokeWidth={1.9} />
-                <span className="txt-sm font-semibold text-navy">{label}</span>
-              </button>
-            )}
-            <button
-              onClick={() => openOverlay('medical')}
-              className="tap col-span-2 rounded-xl border border-[#f0cccc] bg-[#FBE9E9] px-3 py-3 flex items-center gap-2.5 text-left">
-              
-              <HeartPulseIcon className="w-5 h-5 text-setu-red shrink-0" strokeWidth={2} />
-              <span className="flex-1">
-                <span className="block txt-sm font-semibold text-navy">I feel unwell</span>
-                <span className="block txt-xs text-[#a13a3a]">
-                  Nearest medical help from where you are standing
-                </span>
-              </span>
-              <ArrowRightIcon className="w-4 h-4 text-setu-red" strokeWidth={2.2} />
-            </button>
-            <button
+        {/* ── EXPLORE SERVICES ── */}
+        <PageSection title="Explore Station" subtitle="Find what you need inside Dadar station">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <ServiceTile
+              label="Find Me"
+              description="Search any facility, platform or exit"
+              icon={<MapPinIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => openOverlay('findMe')}
+              accent="teal"
+            />
+            <ServiceTile
+              label="Food & Dining"
+              description="Restaurants, stalls and food courts"
+              icon={<UtensilsIcon className="w-5 h-5" strokeWidth={1.9} />}
               onClick={() => openOverlay('more')}
-              className="tap col-span-2 bg-white border hairline rounded-xl px-3 py-3 flex items-center gap-2.5 text-left">
-              
-              <LayoutGridIcon className="w-5 h-5 text-navy shrink-0" strokeWidth={1.9} />
-              <span className="flex-1 txt-sm font-semibold text-navy">More</span>
-              <span className="txt-xs text-muted">
-                Washroom · Food · Parking · Police · Transport
-              </span>
-            </button>
+              accent="amber"
+            />
+            <ServiceTile
+              label="All Facilities"
+              description="Washrooms, tickets, parking and more"
+              icon={<LayoutGridIcon className="w-5 h-5" strokeWidth={1.9} />}
+              onClick={() => openOverlay('more')}
+            />
+            <ServiceTile
+              label="Medical Help"
+              description="Nearest hospital and station aid"
+              icon={<HeartPulseIcon className="w-5 h-5" strokeWidth={2} />}
+              onClick={() => openOverlay('medical')}
+              accent="red"
+            />
+          </div>
+        </PageSection>
+
+        {/* ── CROWD OVERVIEW ── */}
+        <PageSection title="Crowd Overview" subtitle="Current levels across key areas">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {crowdAreas.slice(0, 4).map((area) => (
+              <Card key={area.id} className="p-4" hover>
+                <p className="txt-sm font-semibold text-navy">{area.name}</p>
+                <div className="mt-2">
+                  <CrowdTag level={area.level} />
+                </div>
+                <p className="txt-xs text-muted mt-2 leading-relaxed">{area.reason}</p>
+              </Card>
+            ))}
+          </div>
+        </PageSection>
+
+        {/* ── HOW SETU WORKS ── */}
+        <PageSection title="How SETU Works" subtitle="Three steps to stress-free station navigation">
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              {
+                step: '01',
+                title: 'Set your destination',
+                desc: 'Search for a platform, coach, exit or any station facility.',
+              },
+              {
+                step: '02',
+                title: 'Get smart directions',
+                desc: 'SETU calculates the shortest walk with crowd-aware routing.',
+              },
+              {
+                step: '03',
+                title: 'Navigate with guidance',
+                desc: 'Follow step-by-step directions with voice support in accessibility mode.',
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="relative bg-white border hairline rounded-2xl p-5 shadow-card"
+              >
+                <Mono className="text-3xl font-bold text-navy/10">{item.step}</Mono>
+                <p className="font-display font-semibold text-navy mt-1">{item.title}</p>
+                <p className="txt-sm text-muted mt-1.5 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </PageSection>
+
+        {/* ── ACCESSIBILITY ── */}
+        <section className="py-6 sm:py-8">
+          <div className="bg-navy rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden">
+            <div
+              className="absolute top-0 right-0 w-48 h-48 rounded-full bg-teal/10 -translate-y-1/2 translate-x-1/4"
+              aria-hidden="true"
+            />
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl bg-teal/20 flex items-center justify-center shrink-0">
+                <AccessibilityIcon className="w-7 h-7 text-teal-100" strokeWidth={1.8} />
+              </div>
+              <div className="flex-1">
+                <h2 className="font-display font-semibold text-xl">Built for accessibility</h2>
+                <p className="txt-sm text-white/70 mt-1.5 leading-relaxed max-w-lg">
+                  Larger controls, voice-first guidance, lift and ramp priority routing, and higher
+                  contrast — designed for every traveller.
+                </p>
+              </div>
+              <Button
+                variant="teal"
+                onClick={() => setTab('profile')}
+                className="shrink-0"
+              >
+                Accessibility settings
+              </Button>
+            </div>
           </div>
         </section>
 
-        {!platformChanged &&
-        <>
-            <SectionLabel>Station updates</SectionLabel>
-            <Card className="p-3.5">
-              <p className="txt-sm text-navy">
-                Platform announcements for your train are being monitored. SETU will
+        {/* ── AI ASSISTANT ── */}
+        <section className="py-6 sm:py-8">
+          <div className="bg-white border hairline rounded-2xl p-6 sm:p-8 shadow-card flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="w-14 h-14 rounded-2xl bg-amber/15 flex items-center justify-center shrink-0">
+              <BotIcon className="w-7 h-7 text-[#8a5b00]" strokeWidth={1.8} />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-display font-semibold text-xl text-navy">SETU AI Assistant</h2>
+              <p className="txt-sm text-muted mt-1.5 leading-relaxed max-w-lg">
+                Ask anything about Dadar station — platforms, facilities, exits, and walking
+                directions. Available 24/7 via the chat button.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {['Where is the booking office?', 'How to reach Platform 5?'].map((q) => (
+                  <span
+                    key={q}
+                    className="txt-xs font-medium text-navy bg-slate-100 rounded-full px-3 py-1"
+                  >
+                    {q}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── SAFETY ── */}
+        <PageSection title="Safety & Emergency" subtitle="Help is always nearby">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card className="p-5 flex items-start gap-4" hover>
+              <div className="w-11 h-11 rounded-xl bg-[#FBE9E9] flex items-center justify-center shrink-0">
+                <HeartPulseIcon className="w-5 h-5 text-setu-red" strokeWidth={2} />
+              </div>
+              <div>
+                <p className="font-display font-semibold text-navy">Medical emergency</p>
+                <p className="txt-sm text-muted mt-0.5">
+                  Find nearest hospital or station medical desk instantly.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => openOverlay('medical')}
+                  className="txt-sm font-semibold text-setu-red mt-2 hover:underline underline-offset-2"
+                >
+                  Get medical help →
+                </button>
+              </div>
+            </Card>
+            <Card className="p-5 flex items-start gap-4" hover>
+              <div className="w-11 h-11 rounded-xl bg-navy/5 flex items-center justify-center shrink-0">
+                <ShieldIcon className="w-5 h-5 text-navy" strokeWidth={2} />
+              </div>
+              <div>
+                <p className="font-display font-semibold text-navy">Railway Helpline 139</p>
+                <p className="txt-sm text-muted mt-0.5">
+                  For emergencies, security concerns, or station assistance.
+                </p>
+                <p className="txt-sm font-semibold text-navy mt-2">Available 24/7</p>
+              </div>
+            </Card>
+          </div>
+        </PageSection>
+
+        {/* ── STATION UPDATES ── */}
+        {!platformChanged && (
+          <PageSection title="Station Updates">
+            <Card className="p-5" hover>
+              <p className="txt-sm text-navy leading-relaxed">
+                Platform announcements for your train are being monitored. SETU will automatically
                 recalculate your route if the platform changes.
               </p>
               <button
-              onClick={triggerPlatformChange}
-              className="txt-sm font-semibold text-teal underline underline-offset-2 mt-2">
-              
+                type="button"
+                onClick={triggerPlatformChange}
+                className="txt-sm font-semibold text-teal hover:underline underline-offset-2 mt-3"
+              >
                 Simulate a platform change
               </button>
             </Card>
-          </>
-        }
-      </div>
-    </div>);
+          </PageSection>
+        )}
 
+        {/* ── FAQ ── */}
+        <PageSection title="Frequently Asked Questions" subtitle="Everything you need to know about SETU">
+          <div className="space-y-2">
+            {FAQ.map((item) => (
+              <FaqItem key={item.q} q={item.q} a={item.a} />
+            ))}
+          </div>
+        </PageSection>
+      </PageContainer>
+
+      <AppFooter />
+    </div>
+  );
 }

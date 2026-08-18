@@ -50,6 +50,12 @@ export function MapScreen() {
 
   const [routePicker, setRoutePicker] = React.useState(false);
   const [voicePing, setVoicePing] = React.useState(0);
+  const [recenterFlash, setRecenterFlash] = React.useState(false);
+
+  function handleRecenter() {
+    setRecenterFlash(true);
+    window.setTimeout(() => setRecenterFlash(false), 600);
+  }
 
   React.useEffect(() => {
     if (voicePing === 0) return;
@@ -74,11 +80,9 @@ export function MapScreen() {
     !a11y;
 
   return (
-    <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#EDF1F6]">
-      {/* =========================================================
-          TOP MAP HEADER
-      ========================================================== */}
-      <div className="absolute inset-x-0 top-0 z-20 bg-white/95 backdrop-blur-sm border-b hairline">
+    <div className="relative h-full min-h-0 w-full overflow-hidden bg-[#EDF1F6] flex flex-col lg:flex-row">
+      {/* Map header - full width on mobile, top of map area on desktop */}
+      <div className="absolute inset-x-0 top-0 z-20 bg-white/95 backdrop-blur-sm border-b hairline lg:right-[360px]">
         <div className="mx-auto w-full max-w-6xl px-3 sm:px-4 lg:px-6">
           <div className="flex min-h-[56px] items-center justify-between gap-3 py-2">
             <div className="min-w-0">
@@ -130,11 +134,11 @@ export function MapScreen() {
       ========================================================== */}
       <div
         className="
-          absolute inset-0
+          absolute inset-0 lg:inset-y-0 lg:left-0 lg:right-[360px]
           pt-[100px]
           pb-[clamp(250px,42vh,390px)]
-          px-1.5
-          sm:px-2
+          lg:pb-4
+          px-1.5 sm:px-2
         "
       >
         <div className="relative h-full w-full overflow-hidden rounded-none sm:rounded-xl">
@@ -146,6 +150,7 @@ export function MapScreen() {
                 ? platform
                 : undefined
             }
+            recenterFlash={recenterFlash}
           />
         </div>
       </div>
@@ -155,23 +160,27 @@ export function MapScreen() {
       ========================================================== */}
       <button
         type="button"
-        aria-label="Recenter map"
+        aria-label="Recenter map on your location"
+        onClick={handleRecenter}
         className="
           absolute
           right-3 sm:right-5
+          lg:right-[372px]
           bottom-[clamp(255px,43vh,395px)]
+          lg:bottom-6
           z-20
           flex
           h-11 w-11
           items-center justify-center
-          rounded-full
+          rounded-xl
           bg-white
           border
           hairline
-          shadow-md
+          shadow-card
           text-navy
+          hover:shadow-elevated
           active:scale-95
-          transition-transform
+          transition-all duration-150
         "
       >
         <CrosshairIcon
@@ -185,24 +194,18 @@ export function MapScreen() {
       ========================================================== */}
       <div
         className="
-          absolute
-          inset-x-0
-          bottom-0
-          z-30
-          max-h-[calc(100%-96px)]
-          overflow-hidden
-          rounded-t-2xl
-          border-t
-          hairline
+          absolute inset-x-0 bottom-0 z-30
+          lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] lg:top-0
+          max-h-[calc(100%-96px)] lg:max-h-none
+          overflow-hidden overflow-y-auto
+          rounded-t-2xl lg:rounded-none
+          border-t lg:border-t-0 lg:border-l hairline
           bg-white
-          shadow-[0_-6px_24px_rgba(16,42,67,0.10)]
+          shadow-[0_-6px_24px_rgba(16,42,67,0.10)] lg:shadow-none
         "
       >
         {/* Drag handle */}
-        <div
-          className="flex justify-center pt-2.5"
-          aria-hidden="true"
-        >
+        <div className="flex justify-center pt-2.5 lg:hidden" aria-hidden="true">
           <span className="h-1 w-9 rounded-full bg-slate-300" />
         </div>
 
@@ -335,7 +338,7 @@ export function MapScreen() {
                 Change route
               </Button>
 
-              <Button variant="secondary">
+              <Button variant="secondary" onClick={handleRecenter}>
                 Recenter
               </Button>
 

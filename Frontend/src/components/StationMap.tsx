@@ -48,6 +48,7 @@ interface Props {
   highlightPlatform?: string;
   destination?: {x: number;y: number;label: string;} | null;
   compact?: boolean;
+  recenterFlash?: boolean;
 }
 
 export function StationMap({
@@ -55,7 +56,8 @@ export function StationMap({
   route,
   highlightPlatform,
   destination,
-  compact
+  compact,
+  recenterFlash,
 }: Props) {
   const points = route?.path.map((p) => `${p.x},${p.y}`).join(' ');
   const end = route?.path[route.path.length - 1];
@@ -286,7 +288,7 @@ export function StationMap({
       }
 
       {/* You are here */}
-      <g>
+      <g className={recenterFlash ? 'recenter-flash' : undefined}>
         <circle
           cx={YOU_ARE_HERE.x}
           cy={YOU_ARE_HERE.y}

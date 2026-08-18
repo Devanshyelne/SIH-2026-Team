@@ -7,112 +7,94 @@ import {
   LogOutIcon,
   ShieldIcon,
   TrainFrontIcon,
-  UserIcon } from
-'lucide-react';
+  UserIcon,
+} from 'lucide-react';
 import { useSetu } from '../contexts/SetuContext';
-import { Button, Card, ScreenHeader } from '../components/ui';
+import { PageContainer, PageHero, PageSection } from '../components/layout/PageContainer';
+import { Button, Card } from '../components/ui';
 
 export function Profile() {
-  const { a11y, mode, setMode, reset, openOverlay } = useSetu();
+  const { a11y, setMode, reset, openOverlay } = useSetu();
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar bg-canvas">
-      <ScreenHeader title="Profile" />
+      <PageHero title="Profile" subtitle="Manage your SETU preferences" compact />
 
-      <div className="px-4 py-4 space-y-4">
-        <Card className="p-4 flex items-center gap-3">
-          <span
-            className="w-12 h-12 rounded-full bg-navy text-white flex items-center justify-center"
-            aria-hidden="true">
-            
-            <UserIcon className="w-6 h-6" strokeWidth={1.9} />
+      <PageContainer className="pb-10">
+        <Card className="p-5 sm:p-6 flex items-center gap-4 -mt-2 relative z-10 shadow-elevated" hover>
+          <span className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy to-navy-800 text-white flex items-center justify-center shadow-soft shrink-0">
+            <UserIcon className="w-8 h-8" strokeWidth={1.8} />
           </span>
-          <div className="flex-1">
-            <p className="font-display font-semibold txt-lg text-navy">Pallavi Lotlikar</p>
-            <p className="txt-sm text-muted">Mumbai · Western & Central lines</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-semibold text-xl text-navy">Pallavi Lotlikar</p>
+            <p className="txt-sm text-muted mt-0.5">Mumbai · Western & Central lines</p>
+            <p className="txt-xs text-muted mt-1">Member since 2024</p>
           </div>
         </Card>
 
-        <section aria-labelledby="current-mode">
-          <h2
-            id="current-mode"
-            className="txt-xs font-semibold tracking-[0.12em] uppercase text-muted mb-2">
-            
-            Current mode
-          </h2>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
+        <PageSection title="Current Mode">
+          <Card className="p-5">
+            <div className="flex items-center gap-4">
               <span
-                className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                a11y ? 'bg-teal text-white' : 'bg-slate-100 text-navy'}`
-                }
-                aria-hidden="true">
-                
-                {a11y ?
-                <AccessibilityIcon className="w-5 h-5" strokeWidth={2} /> :
-
-                <TrainFrontIcon className="w-5 h-5" strokeWidth={2} />
-                }
+                className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                  a11y ? 'bg-teal text-white' : 'bg-slate-100 text-navy'
+                }`}
+              >
+                {a11y ? (
+                  <AccessibilityIcon className="w-6 h-6" strokeWidth={2} />
+                ) : (
+                  <TrainFrontIcon className="w-6 h-6" strokeWidth={2} />
+                )}
               </span>
               <div className="flex-1">
-                <p className="font-display font-semibold txt-base text-navy">
+                <p className="font-display font-semibold text-navy">
                   {a11y ? 'Accessibility Mode' : 'Normal Mode'}
                 </p>
-                <p className="txt-sm text-muted">
-                  {a11y ?
-                  'Larger controls, voice-first guidance, lift and ramp priority.' :
-                  'Standard text size, normal navigation and station map.'}
+                <p className="txt-sm text-muted mt-0.5">
+                  {a11y
+                    ? 'Larger controls, voice guidance, lift/ramp priority, higher contrast.'
+                    : 'Standard text size, normal navigation and station map.'}
                 </p>
               </div>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <Button
-                variant={a11y ? 'secondary' : 'primary'}
-                onClick={() => setMode('normal')}
-                aria-pressed={!a11y}>
-                
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Button variant={a11y ? 'secondary' : 'primary'} onClick={() => setMode('normal')} aria-pressed={!a11y}>
                 Normal
               </Button>
-              <Button
-                variant={a11y ? 'primary' : 'secondary'}
-                onClick={() => setMode('accessibility')}
-                aria-pressed={a11y}>
-                
+              <Button variant={a11y ? 'primary' : 'secondary'} onClick={() => setMode('accessibility')} aria-pressed={a11y}>
                 Accessibility
               </Button>
             </div>
           </Card>
-        </section>
+        </PageSection>
 
-        <section aria-labelledby="prefs">
-          <h2
-            id="prefs"
-            className="txt-xs font-semibold tracking-[0.12em] uppercase text-muted mb-2">
-            
-            Preferences
-          </h2>
-          <Card className="divide-y divide-slate-200">
+        <PageSection title="Preferences">
+          <Card className="divide-y divide-border overflow-hidden">
             {[
-            { Icon: BellIcon, label: 'Alerts', detail: 'Platform change, crowd, delays' },
-            { Icon: LanguagesIcon, label: 'Language', detail: 'English · मराठी · हिन्दी' },
-            { Icon: ShieldIcon, label: 'Emergency contacts', detail: '2 saved' }].
-            map(({ Icon, label, detail }) =>
-            <button
-              key={label}
-              className="tap w-full p-3.5 flex items-center gap-3 text-left hover:bg-slate-50">
-              
-                <Icon className="w-5 h-5 text-navy shrink-0" strokeWidth={1.9} />
+              { Icon: BellIcon, label: 'Alerts', detail: 'Platform change, crowd, delays' },
+              { Icon: LanguagesIcon, label: 'Language', detail: 'English · मराठी · हिन्दी' },
+              { Icon: ShieldIcon, label: 'Emergency contacts', detail: '2 saved contacts' },
+            ].map(({ Icon, label, detail }) => (
+              <button
+                key={label}
+                className="tap w-full p-4 flex items-center gap-3 text-left hover:bg-slate-50 transition-colors duration-150"
+              >
+                <div className="w-10 h-10 rounded-xl bg-navy/5 flex items-center justify-center shrink-0">
+                  <Icon className="w-4 h-4 text-navy" strokeWidth={1.9} />
+                </div>
                 <span className="flex-1">
                   <span className="block txt-sm font-semibold text-navy">{label}</span>
                   <span className="block txt-sm text-muted">{detail}</span>
                 </span>
               </button>
-            )}
+            ))}
             <button
               onClick={() => openOverlay('crowd')}
-              className="tap w-full p-3.5 flex items-center gap-3 text-left hover:bg-slate-50">
-              
-              <FlagIcon className="w-5 h-5 text-navy shrink-0" strokeWidth={1.9} />
+              className="tap w-full p-4 flex items-center gap-3 text-left hover:bg-slate-50 transition-colors duration-150"
+            >
+              <div className="w-10 h-10 rounded-xl bg-navy/5 flex items-center justify-center shrink-0">
+                <FlagIcon className="w-4 h-4 text-navy" strokeWidth={1.9} />
+              </div>
               <span className="flex-1">
                 <span className="block txt-sm font-semibold text-navy">Report a problem</span>
                 <span className="block txt-sm text-muted">
@@ -121,17 +103,18 @@ export function Profile() {
               </span>
             </button>
           </Card>
-        </section>
+        </PageSection>
 
-        <Button variant="secondary" full onClick={reset}>
-          <LogOutIcon className="w-4 h-4" strokeWidth={2} />
-          Change mode and restart SETU
-        </Button>
-
-        <p className="txt-xs text-muted text-center pb-2">
-          SETU · Smart Station Navigator · Prototype v3
-        </p>
-      </div>
-    </div>);
-
+        <PageSection title="Account">
+          <Button variant="secondary" full onClick={reset}>
+            <LogOutIcon className="w-4 h-4" strokeWidth={2} />
+            Change mode and restart SETU
+          </Button>
+          <p className="txt-xs text-muted text-center mt-3">
+            SETU · Smart Station Navigator · Prototype v3
+          </p>
+        </PageSection>
+      </PageContainer>
+    </div>
+  );
 }
